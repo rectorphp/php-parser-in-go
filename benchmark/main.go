@@ -50,9 +50,7 @@ func parseAll(files []string, config conf.Config) int64 {
 
 	var wg sync.WaitGroup
 	for range runtime.GOMAXPROCS(0) {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			for path := range jobs {
 				content, err := os.ReadFile(path)
 				if err != nil {
@@ -62,7 +60,7 @@ func parseAll(files []string, config conf.Config) int64 {
 				parser.Parse(content, config)
 				atomic.AddInt64(&parsed, 1)
 			}
-		}()
+		})
 	}
 
 	for _, path := range files {
