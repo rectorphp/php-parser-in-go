@@ -2,8 +2,6 @@
 
 A PHP parser written in Go. It lexes and parses PHP 5, 7 and 8 source into an AST that downstream tools (linters, refactoring, metrics, formatters) can traverse.
 
-Extracted from [reco](https://github.com/TomasVotruba/reco) so the parser can be reused across projects.
-
 ## Install
 
 ```bash
@@ -56,7 +54,5 @@ func main() {
 Run `make build` to regenerate and build (both `goyacc` and `ragel` must be installed). `make test` runs the tests.
 
 ## Credits
-
-Extracted from the [reco](https://github.com/TomasVotruba/reco) project by Tomas Votruba.
 
 Based on [z7zmey/php-parser](https://github.com/z7zmey/php-parser), the original PHP parser written in Go.
