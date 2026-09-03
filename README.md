@@ -58,3 +58,5 @@ Run `make build` to regenerate and build (both `goyacc` and `ragel` must be inst
 ## Credits
 
 Extracted from the [reco](https://github.com/TomasVotruba/reco) project by Tomas Votruba.
+
+Based on [z7zmey/php-parser](https://github.com/z7zmey/php-parser), the original PHP parser written in Go.
