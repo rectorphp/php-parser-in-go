@@ -1,0 +1,48 @@
+version: "2"
+linters:
+  enable:
+    - bodyclose
+    - gocheckcompilerdirectives
+    - gocritic
+    - misspell
+    - nilerr
+    - prealloc
+    - unconvert
+  disable:
+    - errcheck
+  settings:
+    gocritic:
+      # only the performance family (hugeParam, rangeValCopy, appendCombine,
+      # indexAlloc, preferStringWriter, sliceClear, ...); the style and
+      # diagnostic families are not wanted here
+      disable-all: true
+      enabled-tags:
+        - performance
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - staticcheck
+        path: _bench_test\.go
+        text: SA4010
+    paths:
+      # generated parsers and scanners only; the hand-written internal/ packages are linted
+      - internal/php5
+      - internal/php7
+      - internal/php8
+      - internal/scanner
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

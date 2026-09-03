@@ -1,0 +1,8 @@
+.vscode
+.idea
+**/*.test
+
+cpu.pprof
+mem.pprof
+trace.out
+y.output

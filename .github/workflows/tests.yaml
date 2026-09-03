@@ -1,0 +1,92 @@
+name: Tests
+
+on:
+    pull_request:
+        branches:
+            - main
+    push:
+        branches:
+            - main
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-go@v5
+              with:
+                  go-version: "1.26.6"
+
+            - run: go test ./...
+
+    format:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-go@v5
+              with:
+                  go-version: "1.26.6"
+
+            # generated parsers/scanners are not gofmt-clean; the hand-written packages are checked
+            - name: Check gofmt -s
+              run: |
+                  unformatted=$(gofmt -l -s $(find . -name '*.go' -not -path './internal/php*' -not -path './internal/scanner/*'))
+                  if [ -n "$unformatted" ]; then
+                      echo "These files need 'gofmt -s -w':"
+                      echo "$unformatted"
+                      exit 1
+                  fi
+
+            # generated parsers/scanners are excluded; gofix only gates hand-written code
+            - name: Check go fix ./...
+              if: ${{ !cancelled() }}
+              run: |
+                  generated='internal/php5/php5.go internal/php7/php7.go internal/php8/php8.go internal/php8/scanner.go internal/scanner/scanner.go'
+                  changed=$(go fix -diff ./... 2>/dev/null | sed -n "s#^--- $PWD/\(.*\) (old)#\1#p")
+                  for f in $generated; do
+                      changed=$(echo "$changed" | grep -vF "$f" || true)
+                  done
+                  changed=$(echo "$changed" | grep -v '^$' || true)
+                  if [ -n "$changed" ]; then
+                      echo "These files need 'go fix ./...':"
+                      echo "$changed"
+                      exit 1
+                  fi
+
+    analysis:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-go@v5
+              with:
+                  go-version: "1.26.6"
+
+            # generated parsers/scanners are excluded (as in gofmt)
+            - name: gopls modernize
+              run: go run golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest ./pkg/... ./internal/position/...
+
+            - uses: golangci/golangci-lint-action@v8
+              if: ${{ !cancelled() }}
+              with:
+                  version: v2.12.2
+
+    security:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-go@v5
+              with:
+                  go-version: "1.26.6"
+
+            - uses: actions/cache@v4
+              with:
+                  path: ~/go/bin/govulncheck
+                  key: govulncheck-v1.6.0
+            - name: install govulncheck
+              run: test -x ~/go/bin/govulncheck || go install golang.org/x/vuln/cmd/govulncheck@v1.6.0
+            - name: govulncheck
+              run: govulncheck ./...
