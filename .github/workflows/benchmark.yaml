@@ -1,0 +1,63 @@
+name: Benchmark
+
+on:
+    pull_request:
+        branches:
+            - main
+    push:
+        branches:
+            - main
+    schedule:
+        # every 12 hours
+        - cron: '0 */12 * * *'
+
+jobs:
+    corpus:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-go@v5
+              with:
+                  go-version: "1.26.6"
+
+            - name: Clone + install Laravel corpus
+              run: |
+                  git clone --depth 1 https://github.com/laravel/framework laravel
+                  composer install --no-interaction --no-progress --ignore-platform-reqs --working-dir=laravel
+                  # drop intentionally-broken PHP fixtures
+                  rm -rf laravel/tests
+                  find laravel/vendor -depth -type d -name tests -exec rm -rf {} +
+
+            - run: go build -o benchmark-corpus ./benchmark
+
+            - name: Run benchmark (timed + memory)
+              run: |
+                  # average wall-clock over 5 runs
+                  bench() {
+                    total=0
+                    for i in $(seq 1 5); do
+                      start=$(date +%s%3N)
+                      "$@" > /dev/null
+                      end=$(date +%s%3N)
+                      total=$((total + end - start))
+                    done
+                    echo $((total / 5))
+                  }
+                  # peak resident set size (MB) of a single run
+                  mem() {
+                    /usr/bin/time -v "$@" 2>mem.log > /dev/null
+                    awk '/Maximum resident set size/{printf "%d", $NF/1024}' mem.log
+                  }
+                  ms=$(bench ./benchmark-corpus laravel)
+                  mb=$(mem ./benchmark-corpus laravel)
+                  files=$(./benchmark-corpus laravel | awk '{print $2}')
+                  {
+                    echo "## Corpus benchmark"
+                    echo ""
+                    echo "Parsing the full Laravel framework (\`src/\` + Composer \`vendor/\`), average wall-clock over 5 runs."
+                    echo ""
+                    echo "| Files | Avg (5 runs) | Peak mem |"
+                    echo "|------:|-------------:|---------:|"
+                    echo "| $files | $ms ms | $mb MB |"
+                  } | tee -a "$GITHUB_STEP_SUMMARY"
