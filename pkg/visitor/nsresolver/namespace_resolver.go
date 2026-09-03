@@ -196,6 +196,10 @@ func (namespaceResolver *NamespaceResolver) ExprConstFetch(node *ast.ExprConstFe
 	namespaceResolver.ResolveName(node.Const, "const")
 }
 
+func (namespaceResolver *NamespaceResolver) Attribute(node *ast.Attribute) {
+	namespaceResolver.ResolveName(node.Name, "")
+}
+
 func (namespaceResolver *NamespaceResolver) StmtTraitUse(node *ast.StmtTraitUse) {
 	for _, trait := range node.Traits {
 		namespaceResolver.ResolveName(trait, "")
