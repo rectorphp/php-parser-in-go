@@ -44,6 +44,17 @@ func main() {
 - `pkg/visitor` — traverser, printer, dumper, namespace and class resolvers, formatter.
 - `pkg/token`, `pkg/position`, `pkg/version`, `pkg/errors`, `pkg/conf`.
 
+## Benchmark
+
+`benchmark/` parses every `.php` file under a directory and reports the wall-clock time. Point it at any corpus:
+
+```bash
+make bench-corpus DIR=./laravel
+# parsed 2966 files in 1215 ms
+```
+
+CI runs it against a full Laravel framework checkout (`src/` + Composer `vendor/`) on every push and every 12 hours, reporting the average over 5 runs and peak memory in the run's **Summary**.
+
 ## Generated code
 
 `internal/*/php*.go` and `internal/*/scanner.go` are generated. Edit the grammar source instead:

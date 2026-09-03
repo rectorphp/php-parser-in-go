@@ -2,6 +2,9 @@
 .idea
 **/*.test
 
+/laravel/
+/benchmark-corpus
+
 cpu.pprof
 mem.pprof
 trace.out
