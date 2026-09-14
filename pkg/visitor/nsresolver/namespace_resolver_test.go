@@ -552,6 +552,32 @@ func TestResolveClosureName(test *testing.T) {
 	assert.DeepEqual(test, expected, nsResolver.ResolvedNames)
 }
 
+func TestResolveArrowFunctionName(test *testing.T) {
+	nameAB := &ast.Name{Parts: []ast.Vertex{&ast.NamePart{Value: []byte("A")}, &ast.NamePart{Value: []byte("B")}}}
+	nameBC := &ast.Name{Parts: []ast.Vertex{&ast.NamePart{Value: []byte("B")}, &ast.NamePart{Value: []byte("C")}}}
+
+	arrowNode := &ast.ExprArrowFunction{
+		Params: []ast.Vertex{
+			&ast.Parameter{
+				Type: nameAB,
+				Var:  &ast.ExprVariable{Name: &ast.Identifier{Value: []byte("foo")}},
+			},
+		},
+		ReturnType: &ast.Nullable{Expr: nameBC},
+		Expr:       &ast.ExprVariable{Name: &ast.Identifier{Value: []byte("foo")}},
+	}
+
+	expected := map[ast.Vertex]string{
+		nameAB: "A\\B",
+		nameBC: "B\\C",
+	}
+
+	nsResolver := nsresolver.NewNamespaceResolver()
+	traverser.NewTraverser(nsResolver).Traverse(arrowNode)
+
+	assert.DeepEqual(test, expected, nsResolver.ResolvedNames)
+}
+
 func TestResolveConstantsName(test *testing.T) {
 	nameAB := &ast.Name{Parts: []ast.Vertex{&ast.NamePart{Value: []byte("A")}, &ast.NamePart{Value: []byte("B")}}}
 

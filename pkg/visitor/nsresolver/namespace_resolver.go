@@ -144,6 +144,16 @@ func (namespaceResolver *NamespaceResolver) ExprClosure(node *ast.ExprClosure) {
 	}
 }
 
+func (namespaceResolver *NamespaceResolver) ExprArrowFunction(node *ast.ExprArrowFunction) {
+	for _, parameter := range node.Params {
+		namespaceResolver.ResolveType(parameter.(*ast.Parameter).Type)
+	}
+
+	if node.ReturnType != nil {
+		namespaceResolver.ResolveType(node.ReturnType)
+	}
+}
+
 func (namespaceResolver *NamespaceResolver) StmtPropertyList(node *ast.StmtPropertyList) {
 	if node.Type != nil {
 		namespaceResolver.ResolveType(node.Type)
