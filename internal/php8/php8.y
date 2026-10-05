@@ -3140,6 +3140,17 @@ new_non_dereferenceable:
                     Class:  $2,
                 }
             }
+    |   T_NEW attributes anonymous_class
+            {
+                anonymousClass := $3.(*ast.StmtClass)
+                anonymousClass.AttrGroups = $2
+
+                $$ = &ast.ExprNew{
+                    Position: yylex.(*Parser).builder.NewTokenNodePosition($1, $3),
+                    NewTkn: $1,
+                    Class:  anonymousClass,
+                }
+            }
 ;
 
 // Since PHP 8.4 a `new` with an argument list is dereferencable without wrapping
