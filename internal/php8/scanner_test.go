@@ -487,6 +487,44 @@ func TestNumberTokens(test *testing.T) {
 	assert.DeepEqual(test, expected, actual)
 }
 
+func TestExplicitOctalTokens(test *testing.T) {
+	src := `<?php
+		0o777
+		0O17
+		0o7_7
+
+		0o77777_77777_77777_77777_70
+	`
+
+	expected := []string{
+		token.T_LNUMBER.String(),
+		token.T_LNUMBER.String(),
+		token.T_LNUMBER.String(),
+
+		token.T_DNUMBER.String(),
+	}
+
+	config := conf.Config{
+		Version: &version.Version{
+			Major: 8,
+			Minor: 1,
+		},
+	}
+	lexer := NewLexer([]byte(src), config)
+	actual := []string{}
+
+	for {
+		tkn := lexer.Lex()
+		if tkn.ID == 0 {
+			break
+		}
+
+		actual = append(actual, tkn.ID.String())
+	}
+
+	assert.DeepEqual(test, expected, actual)
+}
+
 func TestConstantStrings(test *testing.T) {
 	src := `<?
 		'str'

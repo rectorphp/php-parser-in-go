@@ -5,7 +5,7 @@ import (
     "strconv"
     "strings"
 
-    "github.com/TomasVotruba/reco/pkg/token"
+    "github.com/rectorphp/php-parser-in-go/pkg/token"
 )
 
 %%{ 
@@ -60,6 +60,7 @@ func (lex *Lexer) Lex() *token.Token {
         dnum = (lnum?"." lnum)|(lnum"."lnum?);
         hnum = '0x'[0-9a-fA-F]+('_'[0-9a-fA-F]+)*;
         bnum = '0b'[01]+('_'[01]+)*;
+        onum = ('0o'|'0O')[0-7]+('_'[0-7]+)*;
 
         exponent_dnum = (lnum | dnum) ('e'|'E') ('+'|'-')? lnum;
         varname_first = [a-zA-Z_] | (0x0080..0x00FF);
@@ -169,8 +170,18 @@ func (lex *Lexer) Lex() *token.Token {
 
                 if err == nil {
                     lex.setTokenPosition(tkn); tok = token.T_LNUMBER; fbreak;
-                } 
-                
+                }
+
+                lex.setTokenPosition(tkn); tok = token.T_DNUMBER; fbreak;
+            };
+            onum => {
+                s := strings.Replace(string(lex.data[lex.ts+2:lex.te]), "_", "", -1)
+                _, err := strconv.ParseInt(s, 8, 0)
+
+                if err == nil {
+                    lex.setTokenPosition(tkn); tok = token.T_LNUMBER; fbreak;
+                }
+
                 lex.setTokenPosition(tkn); tok = token.T_DNUMBER; fbreak;
             };
             lnum => {
