@@ -159,7 +159,9 @@ func (printer *printer) Union(node *ast.Union) {
 }
 
 func (printer *printer) Intersection(node *ast.Intersection) {
+	printer.printToken(node.OpenParenthesisTkn, nil)
 	printer.printSeparatedList(node.Types, node.SeparatorTkns, []byte("&"))
+	printer.printToken(node.CloseParenthesisTkn, nil)
 }
 
 func (printer *printer) Parameter(node *ast.Parameter) {

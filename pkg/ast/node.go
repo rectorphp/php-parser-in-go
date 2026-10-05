@@ -52,11 +52,14 @@ func (node *Union) GetPosition() *position.Position {
 }
 
 // Intersection node holds an intersection type such as `Countable&Traversable`,
-// its member types separated by `&`.
+// its member types separated by `&`. In a DNF type the intersection is wrapped
+// in parentheses, e.g. `(A&B)|C`; the parenthesis tokens are then set.
 type Intersection struct {
-	Position      *position.Position
-	Types         []Vertex
-	SeparatorTkns []*token.Token
+	Position            *position.Position
+	OpenParenthesisTkn  *token.Token
+	Types               []Vertex
+	SeparatorTkns       []*token.Token
+	CloseParenthesisTkn *token.Token
 }
 
 func (node *Intersection) Accept(visitor Visitor) {

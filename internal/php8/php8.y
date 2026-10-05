@@ -4,8 +4,8 @@ package php8
 import (
     "strconv"
 
-    "github.com/TomasVotruba/reco/pkg/ast"
-    "github.com/TomasVotruba/reco/pkg/token"
+    "github.com/rectorphp/php-parser-in-go/pkg/ast"
+    "github.com/rectorphp/php-parser-in-go/pkg/token"
 )
 
 %}
@@ -262,6 +262,7 @@ import (
 %type <node> alt_if_stmt_without_else
 %type <node> array_pair possible_array_pair
 %type <node> isset_variable type return_type type_expr union_type intersection_type class_constant
+%type <node> dnf_parenthesized_intersection
 %type <node> class_modifier
 %type <node> argument_list ctor_arguments
 %type <node> trait_adaptations
@@ -2150,6 +2151,18 @@ intersection_type:
             }
 ;
 
+dnf_parenthesized_intersection:
+        '(' intersection_type ')'
+            {
+                intersection := $2.(*ast.Intersection)
+                intersection.Position = yylex.(*Parser).builder.NewTokensPosition($1, $3)
+                intersection.OpenParenthesisTkn = $1
+                intersection.CloseParenthesisTkn = $3
+
+                $$ = intersection
+            }
+;
+
 union_type:
         type '|' type
             {
@@ -2159,7 +2172,38 @@ union_type:
                     SeparatorTkns: []*token.Token{$2},
                 }
             }
+    |   type '|' dnf_parenthesized_intersection
+            {
+                $$ = &ast.Union{
+                    Position: yylex.(*Parser).builder.NewNodesPosition($1, $3),
+                    Types:         []ast.Vertex{$1, $3},
+                    SeparatorTkns: []*token.Token{$2},
+                }
+            }
+    |   dnf_parenthesized_intersection '|' type
+            {
+                $$ = &ast.Union{
+                    Position: yylex.(*Parser).builder.NewNodesPosition($1, $3),
+                    Types:         []ast.Vertex{$1, $3},
+                    SeparatorTkns: []*token.Token{$2},
+                }
+            }
+    |   dnf_parenthesized_intersection '|' dnf_parenthesized_intersection
+            {
+                $$ = &ast.Union{
+                    Position: yylex.(*Parser).builder.NewNodesPosition($1, $3),
+                    Types:         []ast.Vertex{$1, $3},
+                    SeparatorTkns: []*token.Token{$2},
+                }
+            }
     |   union_type '|' type
+            {
+                $1.(*ast.Union).Types = append($1.(*ast.Union).Types, $3)
+                $1.(*ast.Union).SeparatorTkns = append($1.(*ast.Union).SeparatorTkns, $2)
+
+                $$ = $1
+            }
+    |   union_type '|' dnf_parenthesized_intersection
             {
                 $1.(*ast.Union).Types = append($1.(*ast.Union).Types, $3)
                 $1.(*ast.Union).SeparatorTkns = append($1.(*ast.Union).SeparatorTkns, $2)
