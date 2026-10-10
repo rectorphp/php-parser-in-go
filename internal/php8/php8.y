@@ -3958,14 +3958,18 @@ lexical_vars:
             {
                 $$ = &ast.ExprClosure{}
             }
-    |   T_USE '(' lexical_var_list ')'
+    |   T_USE '(' lexical_var_list possible_comma ')'
             {
+                if $4 != nil {
+                    $3.(*ParserSeparatedList).SeparatorTkns = append($3.(*ParserSeparatedList).SeparatorTkns, $4)
+                }
+
                 $$ = &ast.ExprClosure{
                     UseTkn:                 $1,
                     UseOpenParenthesisTkn:  $2,
                     Uses:                   $3.(*ParserSeparatedList).Items,
                     UseSeparatorTkns:       $3.(*ParserSeparatedList).SeparatorTkns,
-                    UseCloseParenthesisTkn: $4,
+                    UseCloseParenthesisTkn: $5,
                 }
             }
 ;
