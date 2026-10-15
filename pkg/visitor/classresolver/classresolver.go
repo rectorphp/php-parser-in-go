@@ -24,15 +24,16 @@ import (
 
 // classData holds the resolved information for a single class name.
 type classData struct {
-	parent      string                          // fully qualified parent name, empty when none
-	interfaces  []string                        // fully qualified names implemented, or extended by an interface
-	isInterface bool                            // set for an interface declaration, which is no class to extend
-	methods     map[string][]string             // method name -> declared parameter names (with leading $)
-	methodNodes map[string]*ast.StmtClassMethod // method name -> declaring node, for body inspection
-	visibility  map[string]string               // method name -> "public"/"protected"/"private"
-	traits      []string                        // fully qualified names of the traits used here
-	properties  map[string]bool                 // property names declared here (no leading $), promotion included
-	ambiguous   bool                            // set when the name was declared more than once
+	parent             string                          // fully qualified parent name, empty when none
+	interfaces         []string                        // fully qualified names implemented, or extended by an interface
+	isInterface        bool                            // set for an interface declaration, which is no class to extend
+	methods            map[string][]string             // method name -> declared parameter names (with leading $)
+	methodNodes        map[string]*ast.StmtClassMethod // method name -> declaring node, for body inspection
+	visibility         map[string]string               // method name -> "public"/"protected"/"private"
+	traits             []string                        // fully qualified names of the traits used here
+	properties         map[string]bool                 // property names declared here (no leading $), promotion included
+	propertyVisibility map[string]string               // property name -> "public"/"protected"/"private"
+	ambiguous          bool                            // set when the name was declared more than once
 }
 
 // Registry holds resolved class signatures and hierarchy, keyed by fully
@@ -277,6 +278,38 @@ func (registry *Registry) InheritsVisibleMethod(startFQN, methodName string) (fo
 		}
 
 		if visibility := data.visibility[methodName]; visibility == "protected" || visibility == "public" {
+			return true, true
+		}
+
+		startFQN = data.parent
+	}
+
+	return false, true
+}
+
+// InheritsVisibleProperty resolves propertyName starting at startFQN and walking
+// up the parent chain, reporting whether an ancestor declares it protected or
+// public — the visibilities that a subclass redeclaration may not reduce below,
+// exactly as for a method. Pass the parent of the class in question as startFQN,
+// so the class's own declaration is excluded.
+//
+// found is true once such a declaration is met; a private ancestor declaration
+// imposes no constraint, so the walk continues past it. resolvable is false when
+// a class in the chain is unknown or ambiguous, meaning the ancestors cannot be
+// proven — a caller that must stay safe treats that like a constraint. The seen
+// set guards against cyclic extends declarations.
+func (registry *Registry) InheritsVisibleProperty(startFQN, propertyName string) (found bool, resolvable bool) {
+	seen := make(map[string]bool)
+
+	for startFQN != "" && !seen[startFQN] {
+		seen[startFQN] = true
+
+		data, ok := registry.classes[startFQN]
+		if !ok || data.ambiguous {
+			return false, false
+		}
+
+		if visibility := data.propertyVisibility[propertyName]; visibility == "protected" || visibility == "public" {
 			return true, true
 		}
 
@@ -628,13 +661,14 @@ func (collector *classCollector) StmtClass(node *ast.StmtClass) {
 	}
 
 	data := &classData{
-		methods:     make(map[string][]string),
-		methodNodes: make(map[string]*ast.StmtClassMethod),
-		visibility:  make(map[string]string),
-		parent:      parentFQN,
-		interfaces:  collector.resolvedList(node.Implements),
-		traits:      collector.traitFQNs(node.Stmts),
-		properties:  propertyNamesFromStmts(node.Stmts),
+		methods:            make(map[string][]string),
+		methodNodes:        make(map[string]*ast.StmtClassMethod),
+		visibility:         make(map[string]string),
+		parent:             parentFQN,
+		interfaces:         collector.resolvedList(node.Implements),
+		traits:             collector.traitFQNs(node.Stmts),
+		properties:         propertyNamesFromStmts(node.Stmts),
+		propertyVisibility: propertyVisibilitiesFromStmts(node.Stmts),
 	}
 
 	for _, stmt := range node.Stmts {
@@ -762,6 +796,67 @@ func propertyNamesFromStmts(stmts []ast.Vertex) map[string]bool {
 		return nil
 	}
 	return names
+}
+
+// propertyVisibilitiesFromStmts records the declared visibility of each property
+// a class body declares, keyed by name without the leading $, covering both plain
+// property declarations and constructor-promoted parameters. A declaration with
+// no visibility modifier defaults to "public", as PHP does.
+func propertyVisibilitiesFromStmts(stmts []ast.Vertex) map[string]string {
+	visibilities := make(map[string]string)
+	for _, stmt := range stmts {
+		switch typed := stmt.(type) {
+		case *ast.StmtPropertyList:
+			visibility := modifiersVisibility(typed.Modifiers)
+			for _, property := range typed.Props {
+				declared, ok := property.(*ast.StmtProperty)
+				if !ok {
+					continue
+				}
+				if name, ok := propertyVariableName(declared.Var); ok {
+					visibilities[name] = visibility
+				}
+			}
+		case *ast.StmtClassMethod:
+			methodName, ok := identifierName(typed.Name)
+			if !ok || !strings.EqualFold(methodName, "__construct") {
+				continue
+			}
+			for _, parameter := range typed.Params {
+				promoted, ok := parameter.(*ast.Parameter)
+				if !ok || len(promoted.Modifiers) == 0 {
+					continue // a parameter with no modifier promotes nothing
+				}
+				if name, ok := propertyVariableName(promoted.Var); ok {
+					visibilities[name] = modifiersVisibility(promoted.Modifiers)
+				}
+			}
+		}
+	}
+	if len(visibilities) == 0 {
+		return nil
+	}
+	return visibilities
+}
+
+// modifiersVisibility returns the visibility a modifier list declares, defaulting
+// to "public" when none of public/protected/private is present.
+func modifiersVisibility(modifiers []ast.Vertex) string {
+	for _, modifier := range modifiers {
+		identifier, ok := modifier.(*ast.Identifier)
+		if !ok {
+			continue
+		}
+		switch strings.ToLower(string(identifier.Value)) {
+		case "public":
+			return "public"
+		case "protected":
+			return "protected"
+		case "private":
+			return "private"
+		}
+	}
+	return "public"
 }
 
 // propertyVariableName returns a property variable's name without its $, so it
