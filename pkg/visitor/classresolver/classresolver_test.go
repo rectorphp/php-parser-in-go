@@ -155,6 +155,66 @@ class Child extends \Vendor\Base {}`)
 	}
 }
 
+func TestRegistry_inheritsVisiblePropertyProtected(test *testing.T) {
+	registry := parse(test, `<?php
+class Base
+{
+    protected $value;
+}
+
+class Child extends Base {}`)
+
+	found, resolvable := registry.InheritsVisibleProperty("Child", "value")
+	if !found || !resolvable {
+		test.Errorf("expected protected ancestor property to be found (found=%v, resolvable=%v)", found, resolvable)
+	}
+}
+
+func TestRegistry_inheritsVisiblePropertyPrivateImposesNoConstraint(test *testing.T) {
+	registry := parse(test, `<?php
+class Base
+{
+    private $value;
+}
+
+class Child extends Base {}`)
+
+	found, resolvable := registry.InheritsVisibleProperty("Child", "value")
+	if found || !resolvable {
+		test.Errorf("expected private ancestor property to impose no constraint (found=%v, resolvable=%v)", found, resolvable)
+	}
+}
+
+func TestRegistry_inheritsVisiblePropertyUnknownAncestor(test *testing.T) {
+	registry := parse(test, `<?php
+class Child extends \Vendor\Base {}`)
+
+	if _, resolvable := registry.InheritsVisibleProperty("Vendor\\Base", "value"); resolvable {
+		test.Error("expected an unknown ancestor to be unresolvable")
+	}
+}
+
+func TestRegistry_inheritsVisiblePropertyPromoted(test *testing.T) {
+	rootNode, err := parser.Parse([]byte(`<?php
+class Base
+{
+    public function __construct(protected string $value) {}
+}
+
+class Child extends Base {}`), conf.Config{Version: &version.Version{Major: 8, Minor: 0}})
+	if err != nil {
+		test.Fatalf("parse error: %v", err)
+	}
+
+	registry := classresolver.NewRegistry()
+	registry.Collect(rootNode)
+
+	found, resolvable := registry.InheritsVisibleProperty("Child", "value")
+	if !found || !resolvable {
+		test.Errorf("expected protected promoted ancestor property to be found (found=%v, resolvable=%v)", found, resolvable)
+	}
+}
+
 func TestRegistry_descendantDeclaresMethodDirectChild(test *testing.T) {
 	registry := parse(test, `<?php
 class Base
