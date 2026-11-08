@@ -331,3 +331,132 @@ class OrderService
 		})
 	}
 }
+
+// TestResolveTypeMethodReturn covers resolving `$this->method()` to the method's
+// declared return type: a single native class or scalar resolves; a missing,
+// union, or non-$this return is left alone, and a nullable return keeps its
+// inner type.
+func TestResolveTypeMethodReturn(test *testing.T) {
+	tests := []struct {
+		name         string
+		source       string
+		expectedType string
+		resolved     bool
+	}{
+		{
+			name: "a class-typed return",
+			source: `<?php
+class OrderService
+{
+    public function boot()
+    {
+        $local = $this->getUser();
+    }
+
+    private function getUser(): User
+    {
+        return $this->user;
+    }
+}`,
+			expectedType: "User",
+			resolved:     true,
+		},
+		{
+			name: "a nullable return keeps the inner type",
+			source: `<?php
+class OrderService
+{
+    public function boot()
+    {
+        $local = $this->getUser();
+    }
+
+    private function getUser(): ?User
+    {
+    }
+}`,
+			expectedType: "User",
+			resolved:     true,
+		},
+		{
+			name: "a scalar return",
+			source: `<?php
+class OrderService
+{
+    public function boot()
+    {
+        $local = $this->name();
+    }
+
+    private function name(): string
+    {
+    }
+}`,
+			expectedType: "string",
+			resolved:     true,
+		},
+		{
+			name: "a union return is unresolved",
+			source: `<?php
+class OrderService
+{
+    public function boot()
+    {
+        $local = $this->getUser();
+    }
+
+    private function getUser(): User|Admin
+    {
+    }
+}`,
+			resolved: false,
+		},
+		{
+			name: "a method with no return type is unresolved",
+			source: `<?php
+class OrderService
+{
+    public function boot()
+    {
+        $local = $this->getUser();
+    }
+
+    private function getUser()
+    {
+    }
+}`,
+			resolved: false,
+		},
+		{
+			name: "a call on another object is unresolved",
+			source: `<?php
+class OrderService
+{
+    public function boot($other)
+    {
+        $local = $other->getUser();
+    }
+
+    private function getUser(): User
+    {
+    }
+}`,
+			resolved: false,
+		},
+	}
+
+	for _, testCase := range tests {
+		test.Run(testCase.name, func(test *testing.T) {
+			class, assign := parseClassAndAssign(test, testCase.source)
+			scopes := typescope.Collect(class)
+
+			typeName, resolved := scopes.ResolveType(assign.Expr, assign.Position)
+			if resolved != testCase.resolved {
+				test.Fatalf("resolved = %v, want %v (type %q)", resolved, testCase.resolved, typeName)
+			}
+			if resolved && typeName != testCase.expectedType {
+				test.Errorf("type = %q, want %q", typeName, testCase.expectedType)
+			}
+		})
+	}
+}
