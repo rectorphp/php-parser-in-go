@@ -7,6 +7,7 @@ import (
 
 // Root node
 type Root struct {
+	AttributeBag
 	Position *position.Position
 	Stmts    []Vertex
 	EndTkn   *token.Token
@@ -22,6 +23,7 @@ func (node *Root) GetPosition() *position.Position {
 
 // Nullable node
 type Nullable struct {
+	AttributeBag
 	Position    *position.Position
 	QuestionTkn *token.Token
 	Expr        Vertex
@@ -38,6 +40,7 @@ func (node *Nullable) GetPosition() *position.Position {
 // Union node holds a union type such as `int|string`, its member types
 // separated by `|`.
 type Union struct {
+	AttributeBag
 	Position      *position.Position
 	Types         []Vertex
 	SeparatorTkns []*token.Token
@@ -55,6 +58,7 @@ func (node *Union) GetPosition() *position.Position {
 // its member types separated by `&`. In a DNF type the intersection is wrapped
 // in parentheses, e.g. `(A&B)|C`; the parenthesis tokens are then set.
 type Intersection struct {
+	AttributeBag
 	Position            *position.Position
 	OpenParenthesisTkn  *token.Token
 	Types               []Vertex
@@ -72,6 +76,7 @@ func (node *Intersection) GetPosition() *position.Position {
 
 // Parameter node
 type Parameter struct {
+	AttributeBag
 	Position     *position.Position
 	AttrGroups   []Vertex
 	Modifiers    []Vertex
@@ -93,6 +98,7 @@ func (node *Parameter) GetPosition() *position.Position {
 
 // Identifier node
 type Identifier struct {
+	AttributeBag
 	Position      *position.Position
 	IdentifierTkn *token.Token
 	Value         []byte
@@ -108,6 +114,7 @@ func (node *Identifier) GetPosition() *position.Position {
 
 // Argument node
 type Argument struct {
+	AttributeBag
 	Position     *position.Position
 	Name         Vertex
 	ColonTkn     *token.Token
@@ -126,6 +133,7 @@ func (node *Argument) GetPosition() *position.Position {
 
 // Attribute node
 type Attribute struct {
+	AttributeBag
 	Position            *position.Position
 	Name                Vertex
 	OpenParenthesisTkn  *token.Token
@@ -144,6 +152,7 @@ func (node *Attribute) GetPosition() *position.Position {
 
 // AttributeGroup node
 type AttributeGroup struct {
+	AttributeBag
 	Position          *position.Position
 	OpenAttributeTkn  *token.Token
 	Attrs             []Vertex
@@ -161,6 +170,7 @@ func (node *AttributeGroup) GetPosition() *position.Position {
 
 // ScalarDnumber node
 type ScalarDnumber struct {
+	AttributeBag
 	Position  *position.Position
 	NumberTkn *token.Token
 	Value     []byte
@@ -176,6 +186,7 @@ func (node *ScalarDnumber) GetPosition() *position.Position {
 
 // ScalarEncapsed node
 type ScalarEncapsed struct {
+	AttributeBag
 	Position      *position.Position
 	OpenQuoteTkn  *token.Token
 	Parts         []Vertex
@@ -192,6 +203,7 @@ func (node *ScalarEncapsed) GetPosition() *position.Position {
 
 // ScalarEncapsedStringPart node
 type ScalarEncapsedStringPart struct {
+	AttributeBag
 	Position       *position.Position
 	EncapsedStrTkn *token.Token
 	Value          []byte
@@ -207,6 +219,7 @@ func (node *ScalarEncapsedStringPart) GetPosition() *position.Position {
 
 // ScalarEncapsedStringVar node
 type ScalarEncapsedStringVar struct {
+	AttributeBag
 	Position                  *position.Position
 	DollarOpenCurlyBracketTkn *token.Token
 	Name                      Vertex
@@ -226,6 +239,7 @@ func (node *ScalarEncapsedStringVar) GetPosition() *position.Position {
 
 // ScalarEncapsedStringVar node
 type ScalarEncapsedStringBrackets struct {
+	AttributeBag
 	Position             *position.Position
 	OpenCurlyBracketTkn  *token.Token
 	Var                  Vertex
@@ -242,6 +256,7 @@ func (node *ScalarEncapsedStringBrackets) GetPosition() *position.Position {
 
 // ScalarHeredoc node
 type ScalarHeredoc struct {
+	AttributeBag
 	Position        *position.Position
 	OpenHeredocTkn  *token.Token
 	Parts           []Vertex
@@ -258,6 +273,7 @@ func (node *ScalarHeredoc) GetPosition() *position.Position {
 
 // ScalarLnumber node
 type ScalarLnumber struct {
+	AttributeBag
 	Position  *position.Position
 	NumberTkn *token.Token
 	Value     []byte
@@ -273,6 +289,7 @@ func (node *ScalarLnumber) GetPosition() *position.Position {
 
 // ScalarMagicConstant node
 type ScalarMagicConstant struct {
+	AttributeBag
 	Position      *position.Position
 	MagicConstTkn *token.Token
 	Value         []byte
@@ -288,6 +305,7 @@ func (node *ScalarMagicConstant) GetPosition() *position.Position {
 
 // ScalarString node
 type ScalarString struct {
+	AttributeBag
 	Position  *position.Position
 	MinusTkn  *token.Token
 	StringTkn *token.Token
@@ -304,6 +322,7 @@ func (node *ScalarString) GetPosition() *position.Position {
 
 // StmtBreak node
 type StmtBreak struct {
+	AttributeBag
 	Position     *position.Position
 	BreakTkn     *token.Token
 	Expr         Vertex
@@ -320,6 +339,7 @@ func (node *StmtBreak) GetPosition() *position.Position {
 
 // StmtCase node
 type StmtCase struct {
+	AttributeBag
 	Position         *position.Position
 	CaseTkn          *token.Token
 	Cond             Vertex
@@ -337,6 +357,7 @@ func (node *StmtCase) GetPosition() *position.Position {
 
 // StmtCatch node
 type StmtCatch struct {
+	AttributeBag
 	Position             *position.Position
 	CatchTkn             *token.Token
 	OpenParenthesisTkn   *token.Token
@@ -359,6 +380,7 @@ func (node *StmtCatch) GetPosition() *position.Position {
 
 // StmtClass node
 type StmtClass struct {
+	AttributeBag
 	Position                *position.Position
 	AttrGroups              []Vertex
 	Modifiers               []Vertex
@@ -388,6 +410,7 @@ func (node *StmtClass) GetPosition() *position.Position {
 
 // StmtClassConstList node
 type StmtClassConstList struct {
+	AttributeBag
 	Position      *position.Position
 	AttrGroups    []Vertex
 	Modifiers     []Vertex
@@ -408,6 +431,7 @@ func (node *StmtClassConstList) GetPosition() *position.Position {
 
 // StmtClassMethod node
 type StmtClassMethod struct {
+	AttributeBag
 	Position            *position.Position
 	AttrGroups          []Vertex
 	Modifiers           []Vertex
@@ -433,6 +457,7 @@ func (node *StmtClassMethod) GetPosition() *position.Position {
 
 // StmtConstList node
 type StmtConstList struct {
+	AttributeBag
 	Position      *position.Position
 	ConstTkn      *token.Token
 	Consts        []Vertex
@@ -450,6 +475,7 @@ func (node *StmtConstList) GetPosition() *position.Position {
 
 // StmtConstant node
 type StmtConstant struct {
+	AttributeBag
 	Position *position.Position
 	Name     Vertex
 	EqualTkn *token.Token
@@ -466,6 +492,7 @@ func (node *StmtConstant) GetPosition() *position.Position {
 
 // StmtContinue node
 type StmtContinue struct {
+	AttributeBag
 	Position     *position.Position
 	ContinueTkn  *token.Token
 	Expr         Vertex
@@ -482,6 +509,7 @@ func (node *StmtContinue) GetPosition() *position.Position {
 
 // StmtDeclare node
 type StmtDeclare struct {
+	AttributeBag
 	Position            *position.Position
 	DeclareTkn          *token.Token
 	OpenParenthesisTkn  *token.Token
@@ -504,6 +532,7 @@ func (node *StmtDeclare) GetPosition() *position.Position {
 
 // StmtDefault node
 type StmtDefault struct {
+	AttributeBag
 	Position         *position.Position
 	DefaultTkn       *token.Token
 	CaseSeparatorTkn *token.Token
@@ -520,6 +549,7 @@ func (node *StmtDefault) GetPosition() *position.Position {
 
 // StmtDo node
 type StmtDo struct {
+	AttributeBag
 	Position            *position.Position
 	DoTkn               *token.Token
 	Stmt                Vertex
@@ -540,6 +570,7 @@ func (node *StmtDo) GetPosition() *position.Position {
 
 // StmtEcho node
 type StmtEcho struct {
+	AttributeBag
 	Position      *position.Position
 	EchoTkn       *token.Token
 	Exprs         []Vertex
@@ -557,6 +588,7 @@ func (node *StmtEcho) GetPosition() *position.Position {
 
 // StmtElse node
 type StmtElse struct {
+	AttributeBag
 	Position *position.Position
 	ElseTkn  *token.Token
 	ColonTkn *token.Token
@@ -573,6 +605,7 @@ func (node *StmtElse) GetPosition() *position.Position {
 
 // StmtElseIf node
 type StmtElseIf struct {
+	AttributeBag
 	Position            *position.Position
 	ElseIfTkn           *token.Token
 	OpenParenthesisTkn  *token.Token
@@ -592,6 +625,7 @@ func (node *StmtElseIf) GetPosition() *position.Position {
 
 // StmtExpression node
 type StmtExpression struct {
+	AttributeBag
 	Position     *position.Position
 	Expr         Vertex
 	SemiColonTkn *token.Token
@@ -607,6 +641,7 @@ func (node *StmtExpression) GetPosition() *position.Position {
 
 // StmtFinally node
 type StmtFinally struct {
+	AttributeBag
 	Position             *position.Position
 	FinallyTkn           *token.Token
 	OpenCurlyBracketTkn  *token.Token
@@ -624,6 +659,7 @@ func (node *StmtFinally) GetPosition() *position.Position {
 
 // StmtFor node
 type StmtFor struct {
+	AttributeBag
 	Position            *position.Position
 	ForTkn              *token.Token
 	OpenParenthesisTkn  *token.Token
@@ -652,6 +688,7 @@ func (node *StmtFor) GetPosition() *position.Position {
 
 // StmtForeach node
 type StmtForeach struct {
+	AttributeBag
 	Position            *position.Position
 	ForeachTkn          *token.Token
 	OpenParenthesisTkn  *token.Token
@@ -678,6 +715,7 @@ func (node *StmtForeach) GetPosition() *position.Position {
 
 // StmtFunction node
 type StmtFunction struct {
+	AttributeBag
 	Position             *position.Position
 	AttrGroups           []Vertex
 	FunctionTkn          *token.Token
@@ -704,6 +742,7 @@ func (node *StmtFunction) GetPosition() *position.Position {
 
 // StmtGlobal node
 type StmtGlobal struct {
+	AttributeBag
 	Position      *position.Position
 	GlobalTkn     *token.Token
 	Vars          []Vertex
@@ -721,6 +760,7 @@ func (node *StmtGlobal) GetPosition() *position.Position {
 
 // StmtGoto node
 type StmtGoto struct {
+	AttributeBag
 	Position     *position.Position
 	GotoTkn      *token.Token
 	Label        Vertex
@@ -737,6 +777,7 @@ func (node *StmtGoto) GetPosition() *position.Position {
 
 // StmtHaltCompiler node
 type StmtHaltCompiler struct {
+	AttributeBag
 	Position            *position.Position
 	HaltCompilerTkn     *token.Token
 	OpenParenthesisTkn  *token.Token
@@ -754,6 +795,7 @@ func (node *StmtHaltCompiler) GetPosition() *position.Position {
 
 // StmtIf node
 type StmtIf struct {
+	AttributeBag
 	Position            *position.Position
 	IfTkn               *token.Token
 	OpenParenthesisTkn  *token.Token
@@ -777,6 +819,7 @@ func (node *StmtIf) GetPosition() *position.Position {
 
 // StmtInlineHtml node
 type StmtInlineHtml struct {
+	AttributeBag
 	Position      *position.Position
 	InlineHtmlTkn *token.Token
 	Value         []byte
@@ -792,6 +835,7 @@ func (node *StmtInlineHtml) GetPosition() *position.Position {
 
 // StmtEnum node holds an enum declaration, optionally backed by a scalar type.
 type StmtEnum struct {
+	AttributeBag
 	Position                *position.Position
 	AttrGroups              []Vertex
 	EnumTkn                 *token.Token
@@ -817,6 +861,7 @@ func (node *StmtEnum) GetPosition() *position.Position {
 // StmtEnumCase node holds one `case` of an enum, with a value when the enum is
 // backed.
 type StmtEnumCase struct {
+	AttributeBag
 	Position     *position.Position
 	AttrGroups   []Vertex
 	CaseTkn      *token.Token
@@ -836,6 +881,7 @@ func (node *StmtEnumCase) GetPosition() *position.Position {
 
 // StmtInterface node
 type StmtInterface struct {
+	AttributeBag
 	Position             *position.Position
 	AttrGroups           []Vertex
 	InterfaceTkn         *token.Token
@@ -858,6 +904,7 @@ func (node *StmtInterface) GetPosition() *position.Position {
 
 // StmtLabel node
 type StmtLabel struct {
+	AttributeBag
 	Position *position.Position
 	Name     Vertex
 	ColonTkn *token.Token
@@ -873,6 +920,7 @@ func (node *StmtLabel) GetPosition() *position.Position {
 
 // StmtNamespace node
 type StmtNamespace struct {
+	AttributeBag
 	Position             *position.Position
 	NsTkn                *token.Token
 	Name                 Vertex
@@ -892,6 +940,7 @@ func (node *StmtNamespace) GetPosition() *position.Position {
 
 // StmtNop node
 type StmtNop struct {
+	AttributeBag
 	Position     *position.Position
 	SemiColonTkn *token.Token
 }
@@ -906,6 +955,7 @@ func (node *StmtNop) GetPosition() *position.Position {
 
 // StmtProperty node
 type StmtProperty struct {
+	AttributeBag
 	Position *position.Position
 	Var      Vertex
 	EqualTkn *token.Token
@@ -922,6 +972,7 @@ func (node *StmtProperty) GetPosition() *position.Position {
 
 // StmtPropertyList node
 type StmtPropertyList struct {
+	AttributeBag
 	Position      *position.Position
 	AttrGroups    []Vertex
 	Modifiers     []Vertex
@@ -941,6 +992,7 @@ func (node *StmtPropertyList) GetPosition() *position.Position {
 
 // StmtReturn node
 type StmtReturn struct {
+	AttributeBag
 	Position     *position.Position
 	ReturnTkn    *token.Token
 	Expr         Vertex
@@ -957,6 +1009,7 @@ func (node *StmtReturn) GetPosition() *position.Position {
 
 // StmtStatic node
 type StmtStatic struct {
+	AttributeBag
 	Position      *position.Position
 	StaticTkn     *token.Token
 	Vars          []Vertex
@@ -974,6 +1027,7 @@ func (node *StmtStatic) GetPosition() *position.Position {
 
 // StmtStaticVar node
 type StmtStaticVar struct {
+	AttributeBag
 	Position *position.Position
 	Var      Vertex
 	EqualTkn *token.Token
@@ -990,6 +1044,7 @@ func (node *StmtStaticVar) GetPosition() *position.Position {
 
 // StmtStmtList node
 type StmtStmtList struct {
+	AttributeBag
 	Position             *position.Position
 	OpenCurlyBracketTkn  *token.Token
 	Stmts                []Vertex
@@ -1006,6 +1061,7 @@ func (node *StmtStmtList) GetPosition() *position.Position {
 
 // StmtSwitch node
 type StmtSwitch struct {
+	AttributeBag
 	Position             *position.Position
 	SwitchTkn            *token.Token
 	OpenParenthesisTkn   *token.Token
@@ -1030,6 +1086,7 @@ func (node *StmtSwitch) GetPosition() *position.Position {
 
 // StmtThrow node
 type StmtThrow struct {
+	AttributeBag
 	Position     *position.Position
 	ThrowTkn     *token.Token
 	Expr         Vertex
@@ -1047,6 +1104,7 @@ func (node *StmtThrow) GetPosition() *position.Position {
 // ExprThrow node is a `throw` used in expression position, such as
 // `$value ?? throw new InvalidArgumentException()`.
 type ExprThrow struct {
+	AttributeBag
 	Position *position.Position
 	ThrowTkn *token.Token
 	Expr     Vertex
@@ -1062,6 +1120,7 @@ func (node *ExprThrow) GetPosition() *position.Position {
 
 // StmtTrait node
 type StmtTrait struct {
+	AttributeBag
 	Position             *position.Position
 	AttrGroups           []Vertex
 	TraitTkn             *token.Token
@@ -1081,6 +1140,7 @@ func (node *StmtTrait) GetPosition() *position.Position {
 
 // StmtTraitUse node
 type StmtTraitUse struct {
+	AttributeBag
 	Position             *position.Position
 	UseTkn               *token.Token
 	Traits               []Vertex
@@ -1101,6 +1161,7 @@ func (node *StmtTraitUse) GetPosition() *position.Position {
 
 // StmtTraitUseAlias node
 type StmtTraitUseAlias struct {
+	AttributeBag
 	Position       *position.Position
 	Trait          Vertex
 	DoubleColonTkn *token.Token
@@ -1121,6 +1182,7 @@ func (node *StmtTraitUseAlias) GetPosition() *position.Position {
 
 // StmtTraitUsePrecedence node
 type StmtTraitUsePrecedence struct {
+	AttributeBag
 	Position       *position.Position
 	Trait          Vertex
 	DoubleColonTkn *token.Token
@@ -1141,6 +1203,7 @@ func (node *StmtTraitUsePrecedence) GetPosition() *position.Position {
 
 // StmtTry node
 type StmtTry struct {
+	AttributeBag
 	Position             *position.Position
 	TryTkn               *token.Token
 	OpenCurlyBracketTkn  *token.Token
@@ -1160,6 +1223,7 @@ func (node *StmtTry) GetPosition() *position.Position {
 
 // StmtUnset node
 type StmtUnset struct {
+	AttributeBag
 	Position            *position.Position
 	UnsetTkn            *token.Token
 	OpenParenthesisTkn  *token.Token
@@ -1179,6 +1243,7 @@ func (node *StmtUnset) GetPosition() *position.Position {
 
 // StmtUseList node
 type StmtUseList struct {
+	AttributeBag
 	Position      *position.Position
 	UseTkn        *token.Token
 	Type          Vertex
@@ -1197,6 +1262,7 @@ func (node *StmtUseList) GetPosition() *position.Position {
 
 // StmtGroupUseList node
 type StmtGroupUseList struct {
+	AttributeBag
 	Position              *position.Position
 	UseTkn                *token.Token
 	Type                  Vertex
@@ -1220,6 +1286,7 @@ func (node *StmtGroupUseList) GetPosition() *position.Position {
 
 // StmtUse node
 type StmtUse struct {
+	AttributeBag
 	Position       *position.Position
 	Type           Vertex
 	NsSeparatorTkn *token.Token
@@ -1238,6 +1305,7 @@ func (node *StmtUse) GetPosition() *position.Position {
 
 // StmtWhile node
 type StmtWhile struct {
+	AttributeBag
 	Position            *position.Position
 	WhileTkn            *token.Token
 	OpenParenthesisTkn  *token.Token
@@ -1259,6 +1327,7 @@ func (node *StmtWhile) GetPosition() *position.Position {
 
 // ExprArray node
 type ExprArray struct {
+	AttributeBag
 	Position        *position.Position
 	ArrayTkn        *token.Token
 	OpenBracketTkn  *token.Token
@@ -1277,6 +1346,7 @@ func (node *ExprArray) GetPosition() *position.Position {
 
 // ExprArrayDimFetch node
 type ExprArrayDimFetch struct {
+	AttributeBag
 	Position        *position.Position
 	Var             Vertex
 	OpenBracketTkn  *token.Token
@@ -1294,6 +1364,7 @@ func (node *ExprArrayDimFetch) GetPosition() *position.Position {
 
 // ExprArrayItem node
 type ExprArrayItem struct {
+	AttributeBag
 	Position       *position.Position
 	EllipsisTkn    *token.Token
 	Key            Vertex
@@ -1312,6 +1383,7 @@ func (node *ExprArrayItem) GetPosition() *position.Position {
 
 // ExprArrowFunction node
 type ExprArrowFunction struct {
+	AttributeBag
 	Position            *position.Position
 	StaticTkn           *token.Token
 	FnTkn               *token.Token
@@ -1336,6 +1408,7 @@ func (node *ExprArrowFunction) GetPosition() *position.Position {
 
 // ExprBitwiseNot node
 type ExprBitwiseNot struct {
+	AttributeBag
 	Position *position.Position
 	TildaTkn *token.Token
 	Expr     Vertex
@@ -1351,6 +1424,7 @@ func (node *ExprBitwiseNot) GetPosition() *position.Position {
 
 // ExprBooleanNot node
 type ExprBooleanNot struct {
+	AttributeBag
 	Position       *position.Position
 	ExclamationTkn *token.Token
 	Expr           Vertex
@@ -1365,6 +1439,7 @@ func (node *ExprBooleanNot) GetPosition() *position.Position {
 }
 
 type ExprBrackets struct {
+	AttributeBag
 	Position            *position.Position
 	OpenParenthesisTkn  *token.Token
 	Expr                Vertex
@@ -1381,6 +1456,7 @@ func (node *ExprBrackets) GetPosition() *position.Position {
 
 // ExprClassConstFetch node
 type ExprClassConstFetch struct {
+	AttributeBag
 	Position       *position.Position
 	Class          Vertex
 	DoubleColonTkn *token.Token
@@ -1397,6 +1473,7 @@ func (node *ExprClassConstFetch) GetPosition() *position.Position {
 
 // ExprClone node
 type ExprClone struct {
+	AttributeBag
 	Position *position.Position
 	CloneTkn *token.Token
 	Expr     Vertex
@@ -1412,6 +1489,7 @@ func (node *ExprClone) GetPosition() *position.Position {
 
 // ExprClosure node
 type ExprClosure struct {
+	AttributeBag
 	Position               *position.Position
 	StaticTkn              *token.Token
 	FunctionTkn            *token.Token
@@ -1442,6 +1520,7 @@ func (node *ExprClosure) GetPosition() *position.Position {
 
 // ExprClosureUse node
 type ExprClosureUse struct {
+	AttributeBag
 	Position     *position.Position
 	AmpersandTkn *token.Token
 	Var          Vertex
@@ -1457,6 +1536,7 @@ func (node *ExprClosureUse) GetPosition() *position.Position {
 
 // ExprConstFetch node
 type ExprConstFetch struct {
+	AttributeBag
 	Position *position.Position
 	Const    Vertex
 }
@@ -1471,6 +1551,7 @@ func (node *ExprConstFetch) GetPosition() *position.Position {
 
 // ExprEmpty node
 type ExprEmpty struct {
+	AttributeBag
 	Position            *position.Position
 	EmptyTkn            *token.Token
 	OpenParenthesisTkn  *token.Token
@@ -1488,6 +1569,7 @@ func (node *ExprEmpty) GetPosition() *position.Position {
 
 // ExprErrorSuppress node
 type ExprErrorSuppress struct {
+	AttributeBag
 	Position *position.Position
 	AtTkn    *token.Token
 	Expr     Vertex
@@ -1503,6 +1585,7 @@ func (node *ExprErrorSuppress) GetPosition() *position.Position {
 
 // ExprEval node
 type ExprEval struct {
+	AttributeBag
 	Position            *position.Position
 	EvalTkn             *token.Token
 	OpenParenthesisTkn  *token.Token
@@ -1520,6 +1603,7 @@ func (node *ExprEval) GetPosition() *position.Position {
 
 // ExprExit node
 type ExprExit struct {
+	AttributeBag
 	Position            *position.Position
 	ExitTkn             *token.Token
 	OpenParenthesisTkn  *token.Token
@@ -1537,6 +1621,7 @@ func (node *ExprExit) GetPosition() *position.Position {
 
 // ExprFunctionCall node
 type ExprFunctionCall struct {
+	AttributeBag
 	Position            *position.Position
 	Function            Vertex
 	OpenParenthesisTkn  *token.Token
@@ -1555,6 +1640,7 @@ func (node *ExprFunctionCall) GetPosition() *position.Position {
 
 // ExprInclude node
 type ExprInclude struct {
+	AttributeBag
 	Position   *position.Position
 	IncludeTkn *token.Token
 	Expr       Vertex
@@ -1570,6 +1656,7 @@ func (node *ExprInclude) GetPosition() *position.Position {
 
 // ExprIncludeOnce node
 type ExprIncludeOnce struct {
+	AttributeBag
 	Position       *position.Position
 	IncludeOnceTkn *token.Token
 	Expr           Vertex
@@ -1585,6 +1672,7 @@ func (node *ExprIncludeOnce) GetPosition() *position.Position {
 
 // ExprInstanceOf node
 type ExprInstanceOf struct {
+	AttributeBag
 	Position      *position.Position
 	Expr          Vertex
 	InstanceOfTkn *token.Token
@@ -1601,6 +1689,7 @@ func (node *ExprInstanceOf) GetPosition() *position.Position {
 
 // ExprIsset node
 type ExprIsset struct {
+	AttributeBag
 	Position            *position.Position
 	IssetTkn            *token.Token
 	OpenParenthesisTkn  *token.Token
@@ -1619,6 +1708,7 @@ func (node *ExprIsset) GetPosition() *position.Position {
 
 // ExprList node
 type ExprList struct {
+	AttributeBag
 	Position        *position.Position
 	ListTkn         *token.Token
 	OpenBracketTkn  *token.Token
@@ -1637,6 +1727,7 @@ func (node *ExprList) GetPosition() *position.Position {
 
 // ExprMethodCall node
 type ExprMethodCall struct {
+	AttributeBag
 	Position             *position.Position
 	Var                  Vertex
 	ObjectOperatorTkn    *token.Token
@@ -1660,6 +1751,7 @@ func (node *ExprMethodCall) GetPosition() *position.Position {
 // ExprNullsafeMethodCall node is a `$object?->method()` call, which short-circuits
 // to null when the object is null.
 type ExprNullsafeMethodCall struct {
+	AttributeBag
 	Position             *position.Position
 	Var                  Vertex
 	ObjectOperatorTkn    *token.Token
@@ -1683,6 +1775,7 @@ func (node *ExprNullsafeMethodCall) GetPosition() *position.Position {
 // ExprNullsafePropertyFetch node is a `$object?->property` access, which
 // short-circuits to null when the object is null.
 type ExprNullsafePropertyFetch struct {
+	AttributeBag
 	Position             *position.Position
 	Var                  Vertex
 	ObjectOperatorTkn    *token.Token
@@ -1701,6 +1794,7 @@ func (node *ExprNullsafePropertyFetch) GetPosition() *position.Position {
 
 // ExprNew node
 type ExprNew struct {
+	AttributeBag
 	Position            *position.Position
 	NewTkn              *token.Token
 	Class               Vertex
@@ -1720,6 +1814,7 @@ func (node *ExprNew) GetPosition() *position.Position {
 
 // ExprPostDec node
 type ExprPostDec struct {
+	AttributeBag
 	Position *position.Position
 	Var      Vertex
 	DecTkn   *token.Token
@@ -1735,6 +1830,7 @@ func (node *ExprPostDec) GetPosition() *position.Position {
 
 // ExprPostInc node
 type ExprPostInc struct {
+	AttributeBag
 	Position *position.Position
 	Var      Vertex
 	IncTkn   *token.Token
@@ -1750,6 +1846,7 @@ func (node *ExprPostInc) GetPosition() *position.Position {
 
 // ExprPreDec node
 type ExprPreDec struct {
+	AttributeBag
 	Position *position.Position
 	DecTkn   *token.Token
 	Var      Vertex
@@ -1765,6 +1862,7 @@ func (node *ExprPreDec) GetPosition() *position.Position {
 
 // ExprPreInc node
 type ExprPreInc struct {
+	AttributeBag
 	Position *position.Position
 	IncTkn   *token.Token
 	Var      Vertex
@@ -1780,6 +1878,7 @@ func (node *ExprPreInc) GetPosition() *position.Position {
 
 // ExprPrint node
 type ExprPrint struct {
+	AttributeBag
 	Position *position.Position
 	PrintTkn *token.Token
 	Expr     Vertex
@@ -1795,6 +1894,7 @@ func (node *ExprPrint) GetPosition() *position.Position {
 
 // ExprPropertyFetch node
 type ExprPropertyFetch struct {
+	AttributeBag
 	Position             *position.Position
 	Var                  Vertex
 	ObjectOperatorTkn    *token.Token
@@ -1813,6 +1913,7 @@ func (node *ExprPropertyFetch) GetPosition() *position.Position {
 
 // ExprRequire node
 type ExprRequire struct {
+	AttributeBag
 	Position   *position.Position
 	RequireTkn *token.Token
 	Expr       Vertex
@@ -1828,6 +1929,7 @@ func (node *ExprRequire) GetPosition() *position.Position {
 
 // ExprRequireOnce node
 type ExprRequireOnce struct {
+	AttributeBag
 	Position       *position.Position
 	RequireOnceTkn *token.Token
 	Expr           Vertex
@@ -1843,6 +1945,7 @@ func (node *ExprRequireOnce) GetPosition() *position.Position {
 
 // ExprShellExec node
 type ExprShellExec struct {
+	AttributeBag
 	Position         *position.Position
 	OpenBacktickTkn  *token.Token
 	Parts            []Vertex
@@ -1859,6 +1962,7 @@ func (node *ExprShellExec) GetPosition() *position.Position {
 
 // ExprStaticCall node
 type ExprStaticCall struct {
+	AttributeBag
 	Position             *position.Position
 	Class                Vertex
 	DoubleColonTkn       *token.Token
@@ -1881,6 +1985,7 @@ func (node *ExprStaticCall) GetPosition() *position.Position {
 
 // ExprStaticPropertyFetch node
 type ExprStaticPropertyFetch struct {
+	AttributeBag
 	Position       *position.Position
 	Class          Vertex
 	DoubleColonTkn *token.Token
@@ -1897,6 +2002,7 @@ func (node *ExprStaticPropertyFetch) GetPosition() *position.Position {
 
 // ExprTernary node
 type ExprTernary struct {
+	AttributeBag
 	Position    *position.Position
 	Cond        Vertex
 	QuestionTkn *token.Token
@@ -1915,6 +2021,7 @@ func (node *ExprTernary) GetPosition() *position.Position {
 
 // ExprMatch node
 type ExprMatch struct {
+	AttributeBag
 	Position             *position.Position
 	MatchTkn             *token.Token
 	OpenParenthesisTkn   *token.Token
@@ -1936,6 +2043,7 @@ func (node *ExprMatch) GetPosition() *position.Position {
 
 // MatchArm node
 type MatchArm struct {
+	AttributeBag
 	Position       *position.Position
 	DefaultTkn     *token.Token
 	Exprs          []Vertex
@@ -1954,6 +2062,7 @@ func (node *MatchArm) GetPosition() *position.Position {
 
 // ExprUnaryMinus node
 type ExprUnaryMinus struct {
+	AttributeBag
 	Position *position.Position
 	MinusTkn *token.Token
 	Expr     Vertex
@@ -1969,6 +2078,7 @@ func (node *ExprUnaryMinus) GetPosition() *position.Position {
 
 // ExprUnaryPlus node
 type ExprUnaryPlus struct {
+	AttributeBag
 	Position *position.Position
 	PlusTkn  *token.Token
 	Expr     Vertex
@@ -1984,6 +2094,7 @@ func (node *ExprUnaryPlus) GetPosition() *position.Position {
 
 // ExprVariable node
 type ExprVariable struct {
+	AttributeBag
 	Position             *position.Position
 	DollarTkn            *token.Token
 	OpenCurlyBracketTkn  *token.Token
@@ -2001,6 +2112,7 @@ func (node *ExprVariable) GetPosition() *position.Position {
 
 // ExprYield node
 type ExprYield struct {
+	AttributeBag
 	Position       *position.Position
 	YieldTkn       *token.Token
 	Key            Vertex
@@ -2018,6 +2130,7 @@ func (node *ExprYield) GetPosition() *position.Position {
 
 // ExprYieldFrom node
 type ExprYieldFrom struct {
+	AttributeBag
 	Position     *position.Position
 	YieldFromTkn *token.Token
 	Expr         Vertex
@@ -2033,6 +2146,7 @@ func (node *ExprYieldFrom) GetPosition() *position.Position {
 
 // ExprCastArray node
 type ExprCastArray struct {
+	AttributeBag
 	Position *position.Position
 	CastTkn  *token.Token
 	Expr     Vertex
@@ -2048,6 +2162,7 @@ func (node *ExprCastArray) GetPosition() *position.Position {
 
 // ExprCastBool node
 type ExprCastBool struct {
+	AttributeBag
 	Position *position.Position
 	CastTkn  *token.Token
 	Expr     Vertex
@@ -2063,6 +2178,7 @@ func (node *ExprCastBool) GetPosition() *position.Position {
 
 // ExprCastDouble node
 type ExprCastDouble struct {
+	AttributeBag
 	Position *position.Position
 	CastTkn  *token.Token
 	Expr     Vertex
@@ -2078,6 +2194,7 @@ func (node *ExprCastDouble) GetPosition() *position.Position {
 
 // ExprCastInt node
 type ExprCastInt struct {
+	AttributeBag
 	Position *position.Position
 	CastTkn  *token.Token
 	Expr     Vertex
@@ -2093,6 +2210,7 @@ func (node *ExprCastInt) GetPosition() *position.Position {
 
 // ExprCastObject node
 type ExprCastObject struct {
+	AttributeBag
 	Position *position.Position
 	CastTkn  *token.Token
 	Expr     Vertex
@@ -2108,6 +2226,7 @@ func (node *ExprCastObject) GetPosition() *position.Position {
 
 // ExprCastString node
 type ExprCastString struct {
+	AttributeBag
 	Position *position.Position
 	CastTkn  *token.Token
 	Expr     Vertex
@@ -2123,6 +2242,7 @@ func (node *ExprCastString) GetPosition() *position.Position {
 
 // ExprCastUnset node
 type ExprCastUnset struct {
+	AttributeBag
 	Position *position.Position
 	CastTkn  *token.Token
 	Expr     Vertex
@@ -2138,6 +2258,7 @@ func (node *ExprCastUnset) GetPosition() *position.Position {
 
 // ExprAssign node
 type ExprAssign struct {
+	AttributeBag
 	Position *position.Position
 	Var      Vertex
 	EqualTkn *token.Token
@@ -2154,6 +2275,7 @@ func (node *ExprAssign) GetPosition() *position.Position {
 
 // ExprAssignReference node
 type ExprAssignReference struct {
+	AttributeBag
 	Position     *position.Position
 	Var          Vertex
 	EqualTkn     *token.Token
@@ -2171,6 +2293,7 @@ func (node *ExprAssignReference) GetPosition() *position.Position {
 
 // ExprAssignBitwiseAnd node
 type ExprAssignBitwiseAnd struct {
+	AttributeBag
 	Position *position.Position
 	Var      Vertex
 	EqualTkn *token.Token
@@ -2187,6 +2310,7 @@ func (node *ExprAssignBitwiseAnd) GetPosition() *position.Position {
 
 // ExprAssignBitwiseOr node
 type ExprAssignBitwiseOr struct {
+	AttributeBag
 	Position *position.Position
 	Var      Vertex
 	EqualTkn *token.Token
@@ -2203,6 +2327,7 @@ func (node *ExprAssignBitwiseOr) GetPosition() *position.Position {
 
 // ExprAssignBitwiseXor node
 type ExprAssignBitwiseXor struct {
+	AttributeBag
 	Position *position.Position
 	Var      Vertex
 	EqualTkn *token.Token
@@ -2219,6 +2344,7 @@ func (node *ExprAssignBitwiseXor) GetPosition() *position.Position {
 
 // ExprAssignCoalesce node
 type ExprAssignCoalesce struct {
+	AttributeBag
 	Position *position.Position
 	Var      Vertex
 	EqualTkn *token.Token
@@ -2235,6 +2361,7 @@ func (node *ExprAssignCoalesce) GetPosition() *position.Position {
 
 // ExprAssignConcat node
 type ExprAssignConcat struct {
+	AttributeBag
 	Position *position.Position
 	Var      Vertex
 	EqualTkn *token.Token
@@ -2251,6 +2378,7 @@ func (node *ExprAssignConcat) GetPosition() *position.Position {
 
 // ExprAssignDiv node
 type ExprAssignDiv struct {
+	AttributeBag
 	Position *position.Position
 	Var      Vertex
 	EqualTkn *token.Token
@@ -2267,6 +2395,7 @@ func (node *ExprAssignDiv) GetPosition() *position.Position {
 
 // ExprAssignMinus node
 type ExprAssignMinus struct {
+	AttributeBag
 	Position *position.Position
 	Var      Vertex
 	EqualTkn *token.Token
@@ -2283,6 +2412,7 @@ func (node *ExprAssignMinus) GetPosition() *position.Position {
 
 // ExprAssignMod node
 type ExprAssignMod struct {
+	AttributeBag
 	Position *position.Position
 	Var      Vertex
 	EqualTkn *token.Token
@@ -2299,6 +2429,7 @@ func (node *ExprAssignMod) GetPosition() *position.Position {
 
 // ExprAssignMul node
 type ExprAssignMul struct {
+	AttributeBag
 	Position *position.Position
 	Var      Vertex
 	EqualTkn *token.Token
@@ -2315,6 +2446,7 @@ func (node *ExprAssignMul) GetPosition() *position.Position {
 
 // ExprAssignPlus node
 type ExprAssignPlus struct {
+	AttributeBag
 	Position *position.Position
 	Var      Vertex
 	EqualTkn *token.Token
@@ -2331,6 +2463,7 @@ func (node *ExprAssignPlus) GetPosition() *position.Position {
 
 // ExprAssignPow node
 type ExprAssignPow struct {
+	AttributeBag
 	Position *position.Position
 	Var      Vertex
 	EqualTkn *token.Token
@@ -2347,6 +2480,7 @@ func (node *ExprAssignPow) GetPosition() *position.Position {
 
 // ExprAssignShiftLeft node
 type ExprAssignShiftLeft struct {
+	AttributeBag
 	Position *position.Position
 	Var      Vertex
 	EqualTkn *token.Token
@@ -2363,6 +2497,7 @@ func (node *ExprAssignShiftLeft) GetPosition() *position.Position {
 
 // ExprAssignShiftRight node
 type ExprAssignShiftRight struct {
+	AttributeBag
 	Position *position.Position
 	Var      Vertex
 	EqualTkn *token.Token
@@ -2379,6 +2514,7 @@ func (node *ExprAssignShiftRight) GetPosition() *position.Position {
 
 // ExprBinaryBitwiseAnd node
 type ExprBinaryBitwiseAnd struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2395,6 +2531,7 @@ func (node *ExprBinaryBitwiseAnd) GetPosition() *position.Position {
 
 // ExprBinaryBitwiseOr node
 type ExprBinaryBitwiseOr struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2411,6 +2548,7 @@ func (node *ExprBinaryBitwiseOr) GetPosition() *position.Position {
 
 // ExprBinaryBitwiseXor node
 type ExprBinaryBitwiseXor struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2427,6 +2565,7 @@ func (node *ExprBinaryBitwiseXor) GetPosition() *position.Position {
 
 // ExprBinaryBooleanAnd node
 type ExprBinaryBooleanAnd struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2443,6 +2582,7 @@ func (node *ExprBinaryBooleanAnd) GetPosition() *position.Position {
 
 // ExprBinaryBooleanOr node
 type ExprBinaryBooleanOr struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2459,6 +2599,7 @@ func (node *ExprBinaryBooleanOr) GetPosition() *position.Position {
 
 // ExprBinaryCoalesce node
 type ExprBinaryCoalesce struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2475,6 +2616,7 @@ func (node *ExprBinaryCoalesce) GetPosition() *position.Position {
 
 // ExprBinaryConcat node
 type ExprBinaryConcat struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2491,6 +2633,7 @@ func (node *ExprBinaryConcat) GetPosition() *position.Position {
 
 // ExprBinaryDiv node
 type ExprBinaryDiv struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2507,6 +2650,7 @@ func (node *ExprBinaryDiv) GetPosition() *position.Position {
 
 // ExprBinaryEqual node
 type ExprBinaryEqual struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2523,6 +2667,7 @@ func (node *ExprBinaryEqual) GetPosition() *position.Position {
 
 // ExprBinaryGreater node
 type ExprBinaryGreater struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2539,6 +2684,7 @@ func (node *ExprBinaryGreater) GetPosition() *position.Position {
 
 // ExprBinaryGreaterOrEqual node
 type ExprBinaryGreaterOrEqual struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2555,6 +2701,7 @@ func (node *ExprBinaryGreaterOrEqual) GetPosition() *position.Position {
 
 // ExprBinaryIdentical node
 type ExprBinaryIdentical struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2571,6 +2718,7 @@ func (node *ExprBinaryIdentical) GetPosition() *position.Position {
 
 // ExprBinaryLogicalAnd node
 type ExprBinaryLogicalAnd struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2587,6 +2735,7 @@ func (node *ExprBinaryLogicalAnd) GetPosition() *position.Position {
 
 // ExprBinaryLogicalOr node
 type ExprBinaryLogicalOr struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2603,6 +2752,7 @@ func (node *ExprBinaryLogicalOr) GetPosition() *position.Position {
 
 // ExprBinaryLogicalXor node
 type ExprBinaryLogicalXor struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2619,6 +2769,7 @@ func (node *ExprBinaryLogicalXor) GetPosition() *position.Position {
 
 // ExprBinaryMinus node
 type ExprBinaryMinus struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2635,6 +2786,7 @@ func (node *ExprBinaryMinus) GetPosition() *position.Position {
 
 // ExprBinaryMod node
 type ExprBinaryMod struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2651,6 +2803,7 @@ func (node *ExprBinaryMod) GetPosition() *position.Position {
 
 // ExprBinaryMul node
 type ExprBinaryMul struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2667,6 +2820,7 @@ func (node *ExprBinaryMul) GetPosition() *position.Position {
 
 // ExprBinaryNotEqual node
 type ExprBinaryNotEqual struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2683,6 +2837,7 @@ func (node *ExprBinaryNotEqual) GetPosition() *position.Position {
 
 // ExprBinaryNotIdentical node
 type ExprBinaryNotIdentical struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2699,6 +2854,7 @@ func (node *ExprBinaryNotIdentical) GetPosition() *position.Position {
 
 // ExprBinaryPlus node
 type ExprBinaryPlus struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2715,6 +2871,7 @@ func (node *ExprBinaryPlus) GetPosition() *position.Position {
 
 // ExprBinaryPow node
 type ExprBinaryPow struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2731,6 +2888,7 @@ func (node *ExprBinaryPow) GetPosition() *position.Position {
 
 // ExprBinaryShiftLeft node
 type ExprBinaryShiftLeft struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2747,6 +2905,7 @@ func (node *ExprBinaryShiftLeft) GetPosition() *position.Position {
 
 // ExprBinaryShiftRight node
 type ExprBinaryShiftRight struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2763,6 +2922,7 @@ func (node *ExprBinaryShiftRight) GetPosition() *position.Position {
 
 // ExprBinarySmaller node
 type ExprBinarySmaller struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2779,6 +2939,7 @@ func (node *ExprBinarySmaller) GetPosition() *position.Position {
 
 // ExprBinarySmallerOrEqual node
 type ExprBinarySmallerOrEqual struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2795,6 +2956,7 @@ func (node *ExprBinarySmallerOrEqual) GetPosition() *position.Position {
 
 // ExprBinarySpaceship node
 type ExprBinarySpaceship struct {
+	AttributeBag
 	Position *position.Position
 	Left     Vertex
 	OpTkn    *token.Token
@@ -2810,6 +2972,7 @@ func (node *ExprBinarySpaceship) GetPosition() *position.Position {
 }
 
 type Name struct {
+	AttributeBag
 	Position      *position.Position
 	Parts         []Vertex
 	SeparatorTkns []*token.Token
@@ -2824,6 +2987,7 @@ func (node *Name) GetPosition() *position.Position {
 }
 
 type NameFullyQualified struct {
+	AttributeBag
 	Position       *position.Position
 	NsSeparatorTkn *token.Token
 	Parts          []Vertex
@@ -2839,6 +3003,7 @@ func (node *NameFullyQualified) GetPosition() *position.Position {
 }
 
 type NameRelative struct {
+	AttributeBag
 	Position       *position.Position
 	NsTkn          *token.Token
 	NsSeparatorTkn *token.Token
@@ -2855,6 +3020,7 @@ func (node *NameRelative) GetPosition() *position.Position {
 }
 
 type NamePart struct {
+	AttributeBag
 	Position  *position.Position
 	StringTkn *token.Token
 	Value     []byte

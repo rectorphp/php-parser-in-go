@@ -5,6 +5,10 @@ import "github.com/rectorphp/php-parser-in-go/pkg/position"
 type Vertex interface {
 	Accept(visitor Visitor)
 	GetPosition() *position.Position
+	// SetAttribute stores metadata assigned after parsing, such as a resolved type.
+	SetAttribute(key string, value any)
+	// GetAttribute returns a stored attribute and whether it was present.
+	GetAttribute(key string) (any, bool)
 }
 
 type Visitor interface {
