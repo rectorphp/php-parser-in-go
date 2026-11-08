@@ -66,7 +66,7 @@ jobs:
 
             # generated parsers/scanners are excluded (as in gofmt)
             - name: gopls modernize
-              run: go run golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest ./pkg/... ./internal/position/...
+              run: go run golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@v0.23.0 ./pkg/... ./internal/position/...
 
             - uses: golangci/golangci-lint-action@v8
               if: ${{ !cancelled() }}
