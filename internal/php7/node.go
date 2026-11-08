@@ -7,6 +7,7 @@ import (
 )
 
 type ParserBrackets struct {
+	ast.AttributeBag
 	Position        *position.Position
 	OpenBracketTkn  *token.Token
 	Child           ast.Vertex
@@ -22,6 +23,7 @@ func (parserBrackets *ParserBrackets) GetPosition() *position.Position {
 }
 
 type ParserSeparatedList struct {
+	ast.AttributeBag
 	Position      *position.Position
 	Items         []ast.Vertex
 	SeparatorTkns []*token.Token
@@ -37,6 +39,7 @@ func (parserSeparatedList *ParserSeparatedList) GetPosition() *position.Position
 
 // TraitAdaptationList node
 type TraitAdaptationList struct {
+	ast.AttributeBag
 	Position             *position.Position
 	OpenCurlyBracketTkn  *token.Token
 	Adaptations          []ast.Vertex
@@ -53,6 +56,7 @@ func (traitAdaptationList *TraitAdaptationList) GetPosition() *position.Position
 
 // ArgumentList node
 type ArgumentList struct {
+	ast.AttributeBag
 	Position            *position.Position
 	OpenParenthesisTkn  *token.Token
 	Arguments           []ast.Vertex
@@ -69,6 +73,7 @@ func (argumentList *ArgumentList) GetPosition() *position.Position {
 }
 
 type ReturnType struct {
+	ast.AttributeBag
 	Position *position.Position
 	ColonTkn *token.Token
 	Type     ast.Vertex
@@ -84,6 +89,7 @@ func (returnType *ReturnType) GetPosition() *position.Position {
 
 // TraitMethodRef node
 type TraitMethodRef struct {
+	ast.AttributeBag
 	Position       *position.Position
 	Trait          ast.Vertex
 	DoubleColonTkn *token.Token
