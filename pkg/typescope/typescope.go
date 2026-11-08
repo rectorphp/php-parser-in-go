@@ -35,8 +35,9 @@ import (
 // declared type of each of its properties — ready to resolve expression types
 // against.
 type Scopes struct {
-	functionScopes []*functionScope
-	propertyTypes  map[string]ast.Vertex
+	functionScopes    []*functionScope
+	propertyTypes     map[string]ast.Vertex
+	methodReturnTypes map[string]ast.Vertex
 }
 
 // Collect gathers every function-like scope in a class subtree, attributes each
@@ -44,10 +45,10 @@ type Scopes struct {
 // definitions in the scope they actually belong to, and records the declared type
 // of every property.
 func Collect(classNode ast.Vertex) Scopes {
-	collector := &scopeCollector{Null: &visitor.Null{}, propertyTypes: map[string]ast.Vertex{}}
+	collector := &scopeCollector{Null: &visitor.Null{}, propertyTypes: map[string]ast.Vertex{}, methodReturnTypes: map[string]ast.Vertex{}}
 	traverser.NewTraverser(collector).Traverse(classNode)
 
-	scopes := Scopes{functionScopes: collector.scopes, propertyTypes: collector.propertyTypes}
+	scopes := Scopes{functionScopes: collector.scopes, propertyTypes: collector.propertyTypes, methodReturnTypes: collector.methodReturnTypes}
 	for _, assignment := range collector.assignments {
 		scope := enclosingScope(assignment.position, scopes)
 		if scope == nil {
@@ -253,8 +254,36 @@ func (scopes Scopes) inferValueType(expr ast.Vertex, atPosition *position.Positi
 		return classNameFromNew(node)
 	case *ast.ExprFunctionCall:
 		return builtinCallReturnType(node)
+	case *ast.ExprMethodCall:
+		return scopes.resolveMethodReturnType(node)
 	}
 	return "", false
+}
+
+// resolveMethodReturnType reads the declared return type of a `$this->method()`
+// call when the method is declared in the collected class subtree. A call on
+// anything but $this, a dynamically named method, or a method whose return type
+// is absent, a union, or an intersection is unresolved — there is no single
+// native type to report. Method names are matched case-insensitively, as PHP
+// resolves them.
+func (scopes Scopes) resolveMethodReturnType(call *ast.ExprMethodCall) (string, bool) {
+	receiver, isVariable := call.Var.(*ast.ExprVariable)
+	if !isVariable {
+		return "", false
+	}
+	receiverName, named := identifierName(receiver.Name)
+	if !named || receiverName != "$this" {
+		return "", false
+	}
+	method, ok := identifierName(call.Method)
+	if !ok {
+		return "", false
+	}
+	returnType, ok := scopes.methodReturnTypes[strings.ToLower(method)]
+	if !ok || returnType == nil {
+		return "", false
+	}
+	return declaredTypeName(returnType)
 }
 
 // builtinCallReturnType resolves a call to an internal PHP function whose return
@@ -461,9 +490,10 @@ func scopeWidth(scope *functionScope) int {
 // whole subtree is walked, so nested-scope assignments land in the nested scope.
 type scopeCollector struct {
 	*visitor.Null
-	scopes        []*functionScope
-	assignments   []*rawAssignment
-	propertyTypes map[string]ast.Vertex
+	scopes            []*functionScope
+	assignments       []*rawAssignment
+	propertyTypes     map[string]ast.Vertex
+	methodReturnTypes map[string]ast.Vertex
 }
 
 // StmtPropertyList records the declared type of every property it declares, so a
@@ -503,6 +533,9 @@ type rawAssignment struct {
 
 func (collector *scopeCollector) StmtClassMethod(node *ast.StmtClassMethod) {
 	collector.addScope(node.Position, node.Params)
+	if name, ok := identifierName(node.Name); ok {
+		collector.methodReturnTypes[strings.ToLower(name)] = node.ReturnType
+	}
 }
 
 func (collector *scopeCollector) ExprClosure(node *ast.ExprClosure) {
