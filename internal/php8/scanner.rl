@@ -40,7 +40,7 @@ func (lex *Lexer) Lex() *token.Token {
                 lex.newLines.Append(lex.p+1)
             }
 
-            if lex.data[lex.p] == '\r' && lex.data[lex.p+1] != '\n' {
+            if lex.data[lex.p] == '\r' && (lex.p+1 == lex.pe || lex.data[lex.p+1] != '\n') {
                 lex.newLines.Append(lex.p+1)
             }
         }
@@ -51,7 +51,7 @@ func (lex *Lexer) Lex() *token.Token {
         action is_not_string_end_or_var { lex.isNotStringEnd('"') && lex.isNotStringVar() }
         action is_not_backqoute_end_or_var { lex.isNotStringEnd('`') && lex.isNotStringVar() }
 
-        newline = ('\r\n' >(nl, 1) | '\r' >(nl, 0) | '\n' >(nl, 0)) $new_line %{};
+        newline = ('\r\n' | '\r' | '\n') $new_line %{};
         any_line = any | newline;
         whitespace = [\t\v\f ];
         whitespace_line = [\t\v\f ] | newline;
