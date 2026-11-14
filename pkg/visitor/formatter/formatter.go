@@ -82,6 +82,10 @@ func (formatter *formatter) newToken(tokenID token.ID, value []byte) *token.Toke
 }
 
 func (formatter *formatter) formatList(nodes []ast.Vertex, separator byte) []*token.Token {
+	if len(nodes) == 0 {
+		return nil
+	}
+
 	separatorTokens := make([]*token.Token, len(nodes)-1)
 	for i, node := range nodes {
 		node.Accept(formatter)
@@ -1146,7 +1150,9 @@ func (formatter *formatter) ExprArray(node *ast.ExprArray) {
 func (formatter *formatter) ExprArrayDimFetch(node *ast.ExprArrayDimFetch) {
 	node.Var.Accept(formatter)
 	node.OpenBracketTkn = formatter.newToken('[', []byte("["))
-	node.Dim.Accept(formatter)
+	if node.Dim != nil {
+		node.Dim.Accept(formatter)
+	}
 	node.CloseBracketTkn = formatter.newToken(']', []byte("]"))
 }
 
@@ -1162,7 +1168,9 @@ func (formatter *formatter) ExprArrayItem(node *ast.ExprArrayItem) {
 		formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
 	}
 
-	node.Val.Accept(formatter)
+	if node.Val != nil {
+		node.Val.Accept(formatter)
+	}
 }
 
 func (formatter *formatter) ExprArrowFunction(node *ast.ExprArrowFunction) {

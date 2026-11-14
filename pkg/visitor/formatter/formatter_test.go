@@ -3118,6 +3118,25 @@ func TestFormatter_ExprArray(test *testing.T) {
 	}
 }
 
+func TestFormatter_ExprArrayEmpty(test *testing.T) {
+	buffer := bytes.NewBufferString("")
+
+	node := &ast.ExprArray{}
+
+	formatterValue := formatter.NewFormatter().WithState(formatter.FormatterStatePHP).WithIndent(1)
+	node.Accept(formatterValue)
+
+	printerValue := printer.NewPrinter(buffer).WithState(printer.PrinterStatePHP)
+	node.Accept(printerValue)
+
+	expected := `array()`
+	actual := buffer.String()
+
+	if expected != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
+
 func TestFormatter_ExprArrayDimFetch(test *testing.T) {
 	buffer := bytes.NewBufferString("")
 
@@ -3141,6 +3160,31 @@ func TestFormatter_ExprArrayDimFetch(test *testing.T) {
 	node.Accept(printerValue)
 
 	expected := `$foo[$bar]`
+	actual := buffer.String()
+
+	if expected != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
+
+func TestFormatter_ExprArrayDimFetchWithoutDim(test *testing.T) {
+	buffer := bytes.NewBufferString("")
+
+	node := &ast.ExprArrayDimFetch{
+		Var: &ast.ExprVariable{
+			Name: &ast.Identifier{
+				Value: []byte("$foo"),
+			},
+		},
+	}
+
+	formatterValue := formatter.NewFormatter().WithState(formatter.FormatterStatePHP).WithIndent(1)
+	node.Accept(formatterValue)
+
+	printerValue := printer.NewPrinter(buffer).WithState(printer.PrinterStatePHP)
+	node.Accept(printerValue)
+
+	expected := `$foo[]`
 	actual := buffer.String()
 
 	if expected != actual {
@@ -4038,6 +4082,36 @@ func TestFormatter_ExprList(test *testing.T) {
 	node.Accept(printerValue)
 
 	expected := `list($a, $b)`
+	actual := buffer.String()
+
+	if expected != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
+
+func TestFormatter_ExprListWithSkippedItem(test *testing.T) {
+	buffer := bytes.NewBufferString("")
+
+	node := &ast.ExprList{
+		Items: []ast.Vertex{
+			&ast.ExprArrayItem{},
+			&ast.ExprArrayItem{
+				Val: &ast.ExprVariable{
+					Name: &ast.Identifier{
+						Value: []byte("$b"),
+					},
+				},
+			},
+		},
+	}
+
+	formatterValue := formatter.NewFormatter().WithState(formatter.FormatterStatePHP).WithIndent(1)
+	node.Accept(formatterValue)
+
+	printerValue := printer.NewPrinter(buffer).WithState(printer.PrinterStatePHP)
+	node.Accept(printerValue)
+
+	expected := `list(, $b)`
 	actual := buffer.String()
 
 	if expected != actual {
