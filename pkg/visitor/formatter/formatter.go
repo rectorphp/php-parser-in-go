@@ -102,7 +102,10 @@ func (formatter *formatter) formatStmts(list *[]ast.Vertex) {
 		formatter.lastSemiColon = nil
 
 		if _, ok := statement.(*ast.StmtInlineHtml); ok {
-			if formatter.lastSemiColon != nil {
+			if formatter.state == FormatterStateHTML {
+				// Nothing to close: the file starts with HTML, or more HTML
+				// follows.
+			} else if formatter.lastSemiColon != nil {
 				formatter.lastSemiColon.Value = append(formatter.lastSemiColon.Value, '?', '>')
 			} else {
 				*list = insert(*list, i+insertCounter, &ast.StmtNop{
@@ -710,7 +713,17 @@ func (formatter *formatter) StmtIf(node *ast.StmtIf) {
 }
 
 func (formatter *formatter) StmtInlineHtml(node *ast.StmtInlineHtml) {
-	node.InlineHtmlTkn = formatter.newToken(token.T_STRING, node.Value)
+	// In HTML, layout whitespace would be output and needs no open tag.
+	freeFloating := formatter.freeFloating
+	if formatter.state == FormatterStateHTML {
+		freeFloating = nil
+	}
+	formatter.resetFreeFloating()
+	node.InlineHtmlTkn = &token.Token{
+		ID:           token.T_INLINE_HTML,
+		Value:        node.Value,
+		FreeFloating: freeFloating,
+	}
 	formatter.state = FormatterStateHTML
 }
 
