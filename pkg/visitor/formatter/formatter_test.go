@@ -1780,6 +1780,47 @@ func TestFormatter_StmtInlineHtml(test *testing.T) {
 	}
 }
 
+func TestFormatter_RootStartingWithInlineHtml(test *testing.T) {
+	buffer := bytes.NewBufferString("")
+
+	node := &ast.Root{
+		Stmts: []ast.Vertex{
+			&ast.StmtInlineHtml{
+				Value: []byte("<b>"),
+			},
+			&ast.StmtInlineHtml{
+				Value: []byte("<i>"),
+			},
+			&ast.StmtEcho{
+				Exprs: []ast.Vertex{
+					&ast.ExprVariable{
+						Name: &ast.Identifier{
+							Value: []byte("$foo"),
+						},
+					},
+				},
+			},
+			&ast.StmtInlineHtml{
+				Value: []byte("</b>"),
+			},
+		},
+	}
+
+	formatterValue := formatter.NewFormatter()
+	node.Accept(formatterValue)
+
+	printerValue := printer.NewPrinter(buffer)
+	node.Accept(printerValue)
+
+	expected := `<b><i><?php 
+echo $foo;?></b>`
+	actual := buffer.String()
+
+	if expected != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
+
 func TestFormatter_StmtInterface(test *testing.T) {
 	buffer := bytes.NewBufferString("")
 
