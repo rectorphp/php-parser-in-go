@@ -3863,6 +3863,38 @@ func TestFormatter_ExprFunctionCall(test *testing.T) {
 	}
 }
 
+func TestFormatter_ExprFunctionCall_FirstClassCallable(test *testing.T) {
+	buffer := bytes.NewBufferString("")
+
+	node := &ast.ExprFunctionCall{
+		Function: &ast.Name{
+			Parts: []ast.Vertex{
+				&ast.NamePart{
+					Value: []byte("foo"),
+				},
+			},
+		},
+		Args: []ast.Vertex{
+			&ast.Argument{
+				VariadicTkn: &token.Token{},
+			},
+		},
+	}
+
+	formatterValue := formatter.NewFormatter().WithState(formatter.FormatterStatePHP).WithIndent(1)
+	node.Accept(formatterValue)
+
+	printerValue := printer.NewPrinter(buffer).WithState(printer.PrinterStatePHP)
+	node.Accept(printerValue)
+
+	expected := `foo(...)`
+	actual := buffer.String()
+
+	if expected != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
+
 func TestFormatter_ExprFunctionCall_Arguments(test *testing.T) {
 	buffer := bytes.NewBufferString("")
 
