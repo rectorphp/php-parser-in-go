@@ -347,12 +347,14 @@ func (formatter *formatter) StmtClass(node *ast.StmtClass) {
 	formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
 	if node.Extends != nil {
 		node.ExtendsTkn = formatter.newToken(token.T_EXTENDS, []byte("extends"))
+		formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
 		node.Extends.Accept(formatter)
 		formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
 	}
 
 	if node.Implements != nil {
 		node.ImplementsTkn = formatter.newToken(token.T_IMPLEMENTS, []byte("implements"))
+		formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
 		node.ImplementsSeparatorTkns = formatter.formatList(node.Implements, ',')
 		formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
 	}
@@ -742,6 +744,7 @@ func (formatter *formatter) StmtEnum(node *ast.StmtEnum) {
 
 	if node.Implements != nil {
 		node.ImplementsTkn = formatter.newToken(token.T_IMPLEMENTS, []byte("implements"))
+		formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
 		node.ImplementsSeparatorTkns = formatter.formatList(node.Implements, ',')
 		formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
 	}
@@ -785,6 +788,7 @@ func (formatter *formatter) StmtInterface(node *ast.StmtInterface) {
 
 	if node.Extends != nil {
 		node.ExtendsTkn = formatter.newToken(token.T_EXTENDS, []byte("extends"))
+		formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
 		node.ExtendsSeparatorTkns = formatter.formatList(node.Extends, ',')
 		formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
 	}
