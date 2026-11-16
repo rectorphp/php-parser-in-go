@@ -217,6 +217,16 @@ func (lex *Lexer) ungetStr(suffix string) {
 	}
 }
 
+// addOpenTagToken adds the open tag the token starts with: <?, or <?php
+// where php is all that follows, which opens PHP code since PHP 7.4.
+func (lex *Lexer) addOpenTagToken(t *token.Token) {
+	if lex.pe-lex.te == 3 && strings.EqualFold(string(lex.data[lex.te:lex.pe]), "php") {
+		lex.p += 3
+		lex.te += 3
+	}
+	lex.addFreeFloatingToken(t, token.T_OPEN_TAG, lex.ts, lex.te)
+}
+
 func (lex *Lexer) ungetCnt(count int) {
 	lex.p = lex.p - count
 	lex.te = lex.te - count
