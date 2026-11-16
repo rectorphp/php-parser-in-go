@@ -4820,6 +4820,71 @@ func TestFormatter_ExprVariable_Variable(test *testing.T) {
 	}
 }
 
+func TestFormatter_ExprArrayDimFetch_VariableVariable(test *testing.T) {
+	buffer := bytes.NewBufferString("")
+
+	node := &ast.ExprArrayDimFetch{
+		Var: &ast.ExprVariable{
+			Name: &ast.ExprVariable{
+				Name: &ast.Identifier{
+					Value: []byte("$foo"),
+				},
+			},
+		},
+		Dim: &ast.ScalarString{
+			Value: []byte("'bar'"),
+		},
+	}
+
+	formatterValue := formatter.NewFormatter().WithState(formatter.FormatterStatePHP).WithIndent(1)
+	node.Accept(formatterValue)
+
+	printerValue := printer.NewPrinter(buffer).WithState(printer.PrinterStatePHP)
+	node.Accept(printerValue)
+
+	expected := `${$foo}['bar']`
+	actual := buffer.String()
+
+	if expected != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
+
+func TestFormatter_ExprArrayDimFetch_VariableProperty(test *testing.T) {
+	buffer := bytes.NewBufferString("")
+
+	node := &ast.ExprArrayDimFetch{
+		Var: &ast.ExprPropertyFetch{
+			Var: &ast.ExprVariable{
+				Name: &ast.Identifier{
+					Value: []byte("$foo"),
+				},
+			},
+			Prop: &ast.ExprVariable{
+				Name: &ast.Identifier{
+					Value: []byte("$bar"),
+				},
+			},
+		},
+		Dim: &ast.ScalarString{
+			Value: []byte("'baz'"),
+		},
+	}
+
+	formatterValue := formatter.NewFormatter().WithState(formatter.FormatterStatePHP).WithIndent(1)
+	node.Accept(formatterValue)
+
+	printerValue := printer.NewPrinter(buffer).WithState(printer.PrinterStatePHP)
+	node.Accept(printerValue)
+
+	expected := `$foo->{$bar}['baz']`
+	actual := buffer.String()
+
+	if expected != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
+
 func TestFormatter_ExprVariable_Expression(test *testing.T) {
 	buffer := bytes.NewBufferString("")
 
