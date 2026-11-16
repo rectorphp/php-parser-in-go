@@ -35,6 +35,37 @@ func TestFormatter_Root(test *testing.T) {
 	}
 }
 
+func TestFormatter_Root_TrailingOpenTag(test *testing.T) {
+	buffer := bytes.NewBufferString("")
+
+	node := &ast.Root{
+		Stmts: []ast.Vertex{
+			&ast.StmtNop{},
+		},
+		EndTkn: &token.Token{
+			FreeFloating: []*token.Token{
+				{ID: token.T_OPEN_TAG, Value: []byte("<?php\n")},
+				{ID: token.T_COMMENT, Value: []byte("// trailing")},
+			},
+		},
+	}
+
+	formatterValue := formatter.NewFormatter()
+	node.Accept(formatterValue)
+
+	printerValue := printer.NewPrinter(buffer)
+	node.Accept(printerValue)
+
+	expected := `<?php 
+
+;// trailing`
+	actual := buffer.String()
+
+	if expected != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
+
 func TestFormatter_Nullable(test *testing.T) {
 	buffer := bytes.NewBufferString("")
 
