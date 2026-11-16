@@ -217,6 +217,44 @@ func (lex *Lexer) ungetStr(suffix string) {
 	}
 }
 
+// addHaltCommentToken adds the comment that starts at the token, between
+// __halt_compiler and its semicolon, where PHP takes comments as anywhere
+// else, and reports whether there is one.
+func (lex *Lexer) addHaltCommentToken(t *token.Token) bool {
+	rest := lex.data[lex.ts:lex.pe]
+	id := token.T_COMMENT
+	var n int
+	switch {
+	case bytes.HasPrefix(rest, []byte("/*")):
+		n = len(rest)
+		if end := bytes.Index(rest[2:], []byte("*/")); end >= 0 {
+			n = end + 4
+		}
+		if n > 4 && bytes.HasPrefix(rest, []byte("/**")) {
+			id = token.T_DOC_COMMENT
+		}
+	case bytes.HasPrefix(rest, []byte("//")) || bytes.HasPrefix(rest, []byte("#")) && !bytes.HasPrefix(rest, []byte("#[")):
+		n = len(rest)
+		for i := 1; i < len(rest); i++ {
+			if rest[i] == '\n' || rest[i] == '\r' || rest[i] == '?' && i+1 < len(rest) && rest[i+1] == '>' {
+				n = i
+				break
+			}
+		}
+	default:
+		return false
+	}
+	for i := lex.ts; i < lex.ts+n; i++ {
+		if lex.data[i] == '\n' || lex.data[i] == '\r' && (i+1 == lex.pe || lex.data[i+1] != '\n') {
+			lex.newLines.Append(i + 1)
+		}
+	}
+	lex.te = lex.ts + n
+	lex.p = lex.te - 1
+	lex.addFreeFloatingToken(t, id, lex.ts, lex.te)
+	return true
+}
+
 func (lex *Lexer) ungetCnt(count int) {
 	lex.p = lex.p - count
 	lex.te = lex.te - count
