@@ -3639,6 +3639,56 @@ func TestFormatter_ExprClosure_Use(test *testing.T) {
 	}
 }
 
+func TestFormatter_ExprClosure_ParamsAndUses(test *testing.T) {
+	buffer := bytes.NewBufferString("")
+
+	node := &ast.ExprClosure{
+		Params: []ast.Vertex{
+			&ast.Parameter{
+				Var: &ast.ExprVariable{
+					Name: &ast.Identifier{
+						Value: []byte("$a"),
+					},
+				},
+			},
+		},
+		Uses: []ast.Vertex{
+			&ast.ExprClosureUse{
+				Var: &ast.ExprVariable{
+					Name: &ast.Identifier{
+						Value: []byte("$foo"),
+					},
+				},
+			},
+			&ast.ExprClosureUse{
+				Var: &ast.ExprVariable{
+					Name: &ast.Identifier{
+						Value: []byte("$bar"),
+					},
+				},
+			},
+		},
+		Stmts: []ast.Vertex{
+			&ast.StmtNop{},
+		},
+	}
+
+	formatterValue := formatter.NewFormatter().WithState(formatter.FormatterStatePHP).WithIndent(1)
+	node.Accept(formatterValue)
+
+	printerValue := printer.NewPrinter(buffer).WithState(printer.PrinterStatePHP)
+	node.Accept(printerValue)
+
+	expected := `function($a) use($foo, $bar) {
+        ;
+    }`
+	actual := buffer.String()
+
+	if expected != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
+
 func TestFormatter_ExprClosureUse(test *testing.T) {
 	buffer := bytes.NewBufferString("")
 
