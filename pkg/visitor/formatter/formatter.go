@@ -1145,9 +1145,33 @@ func (formatter *formatter) ExprArray(node *ast.ExprArray) {
 
 func (formatter *formatter) ExprArrayDimFetch(node *ast.ExprArrayDimFetch) {
 	node.Var.Accept(formatter)
+	formatter.braceDimensionBase(node.Var)
 	node.OpenBracketTkn = formatter.newToken('[', []byte("["))
 	node.Dim.Accept(formatter)
 	node.CloseBracketTkn = formatter.newToken(']', []byte("]"))
+}
+
+// braceDimensionBase braces a variable name a dimension follows: PHP 5
+// reads $$a['b'] as ${$a['b']} and $a->$b['c'] as $a->{$b['c']}, where
+// PHP 7 reads ${$a}['b'] and $a->{$b}['c'].
+func (formatter *formatter) braceDimensionBase(base ast.Vertex) {
+	switch n := base.(type) {
+	case *ast.ExprVariable:
+		if _, ok := n.Name.(*ast.ExprVariable); ok {
+			n.OpenCurlyBracketTkn = formatter.newToken('{', []byte("{"))
+			n.CloseCurlyBracketTkn = formatter.newToken('}', []byte("}"))
+		}
+	case *ast.ExprPropertyFetch:
+		if _, ok := n.Prop.(*ast.ExprVariable); ok {
+			n.OpenCurlyBracketTkn = formatter.newToken('{', []byte("{"))
+			n.CloseCurlyBracketTkn = formatter.newToken('}', []byte("}"))
+		}
+	case *ast.ExprNullsafePropertyFetch:
+		if _, ok := n.Prop.(*ast.ExprVariable); ok {
+			n.OpenCurlyBracketTkn = formatter.newToken('{', []byte("{"))
+			n.CloseCurlyBracketTkn = formatter.newToken('}', []byte("}"))
+		}
+	}
 }
 
 func (formatter *formatter) ExprArrayItem(node *ast.ExprArrayItem) {
