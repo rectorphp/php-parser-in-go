@@ -24783,8 +24783,10 @@ func (lex *Lexer) Lex() *token.Token {
 		// line internal/php8/scanner.rl:501
 		lex.te = (lex.p) + 1
 		{
-			lex.ungetCnt(1)
-			lex.cs = 128
+			if !lex.addHaltCommentToken(tkn) {
+				lex.ungetCnt(1)
+				lex.cs = 128
+			}
 		}
 		goto _again
 	tr819:
@@ -24825,8 +24827,10 @@ func (lex *Lexer) Lex() *token.Token {
 		lex.te = (lex.p)
 		(lex.p)--
 		{
-			lex.ungetCnt(1)
-			lex.cs = 128
+			if !lex.addHaltCommentToken(tkn) {
+				lex.ungetCnt(1)
+				lex.cs = 128
+			}
 		}
 		goto _again
 	st538:
@@ -25005,8 +25009,10 @@ func (lex *Lexer) Lex() *token.Token {
 		// line internal/php8/scanner.rl:507
 		lex.te = (lex.p) + 1
 		{
-			lex.ungetCnt(1)
-			lex.cs = 128
+			if !lex.addHaltCommentToken(tkn) {
+				lex.ungetCnt(1)
+				lex.cs = 128
+			}
 		}
 		goto _again
 	tr830:
@@ -25047,8 +25053,10 @@ func (lex *Lexer) Lex() *token.Token {
 		lex.te = (lex.p)
 		(lex.p)--
 		{
-			lex.ungetCnt(1)
-			lex.cs = 128
+			if !lex.addHaltCommentToken(tkn) {
+				lex.ungetCnt(1)
+				lex.cs = 128
+			}
 		}
 		goto _again
 	st542:
@@ -25227,8 +25235,10 @@ func (lex *Lexer) Lex() *token.Token {
 		// line internal/php8/scanner.rl:513
 		lex.te = (lex.p) + 1
 		{
-			lex.ungetCnt(1)
-			lex.cs = 128
+			if !lex.addHaltCommentToken(tkn) {
+				lex.ungetCnt(1)
+				lex.cs = 128
+			}
 		}
 		goto _again
 	tr841:
@@ -25269,8 +25279,10 @@ func (lex *Lexer) Lex() *token.Token {
 		lex.te = (lex.p)
 		(lex.p)--
 		{
-			lex.ungetCnt(1)
-			lex.cs = 128
+			if !lex.addHaltCommentToken(tkn) {
+				lex.ungetCnt(1)
+				lex.cs = 128
+			}
 		}
 		goto _again
 	st546:

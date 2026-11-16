@@ -405,6 +405,52 @@ func TestShebang(test *testing.T) {
 	assert.DeepEqual(test, expected, actual)
 }
 
+func TestHaltCompilerComments(test *testing.T) {
+	src := "<?php __halt_compiler/* a */ /** b */( // c\n) # d\n;\x00/*data"
+
+	config := conf.Config{
+		Version: &version.Version{
+			Major: 8,
+			Minor: 0,
+		},
+	}
+	lexer := NewLexer([]byte(src), config)
+
+	ids := []token.ID{}
+	var last *token.Token
+	for {
+		tkn := lexer.Lex()
+		if tkn.ID == 0 {
+			last = tkn
+			break
+		}
+		ids = append(ids, tkn.ID)
+	}
+
+	assert.DeepEqual(test, []token.ID{token.T_HALT_COMPILER, token.ID('('), token.ID(')'), token.ID(';')}, ids)
+	assert.Equal(test, "\x00/*data", string(last.FreeFloating[len(last.FreeFloating)-1].Value))
+}
+
+func TestHaltCompilerMultilineComment(test *testing.T) {
+	src := "<?php __halt_compiler/*\n\n*/(\n);"
+
+	config := conf.Config{
+		Version: &version.Version{
+			Major: 8,
+			Minor: 0,
+		},
+	}
+	lexer := NewLexer([]byte(src), config)
+
+	lexer.Lex()
+	tkn := lexer.Lex()
+	assert.Equal(test, token.ID('('), tkn.ID)
+	assert.Equal(test, 3, tkn.Position.StartLine)
+	tkn = lexer.Lex()
+	assert.Equal(test, token.ID(')'), tkn.ID)
+	assert.Equal(test, 4, tkn.Position.StartLine)
+}
+
 func TestShebangHtml(test *testing.T) {
 	src := `#!/usr/bin/env php
 <br/><?php
