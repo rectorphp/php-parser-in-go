@@ -6800,3 +6800,67 @@ func TestFormatter_NameNamePart(test *testing.T) {
 		test.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
 	}
 }
+
+func TestFormatter_ExprNew_AnonymousClass(test *testing.T) {
+	buffer := bytes.NewBufferString("")
+
+	node := &ast.ExprNew{
+		Class: &ast.StmtClass{
+			Args: []ast.Vertex{
+				&ast.Argument{
+					Expr: &ast.ExprVariable{
+						Name: &ast.Identifier{
+							Value: []byte("$a"),
+						},
+					},
+				},
+			},
+			Extends: &ast.Name{
+				Parts: []ast.Vertex{
+					&ast.NamePart{
+						Value: []byte("bar"),
+					},
+				},
+			},
+			Stmts: []ast.Vertex{
+				&ast.StmtNop{},
+			},
+		},
+	}
+
+	formatterValue := formatter.NewFormatter().WithState(formatter.FormatterStatePHP).WithIndent(1)
+	node.Accept(formatterValue)
+
+	printerValue := printer.NewPrinter(buffer).WithState(printer.PrinterStatePHP)
+	node.Accept(printerValue)
+
+	expected := `new class($a) extends bar {
+        ;
+    }`
+	actual := buffer.String()
+
+	if expected != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
+
+func TestFormatter_ExprNew_EmptyAnonymousClass(test *testing.T) {
+	buffer := bytes.NewBufferString("")
+
+	node := &ast.ExprNew{
+		Class: &ast.StmtClass{},
+	}
+
+	formatterValue := formatter.NewFormatter().WithState(formatter.FormatterStatePHP).WithIndent(1)
+	node.Accept(formatterValue)
+
+	printerValue := printer.NewPrinter(buffer).WithState(printer.PrinterStatePHP)
+	node.Accept(printerValue)
+
+	expected := `new class {}`
+	actual := buffer.String()
+
+	if expected != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}

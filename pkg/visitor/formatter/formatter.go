@@ -318,8 +318,10 @@ func (formatter *formatter) StmtClass(node *ast.StmtClass) {
 
 	node.ClassTkn = formatter.newToken(token.T_CLASS, []byte("class"))
 
-	formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
-	node.Name.Accept(formatter)
+	if node.Name != nil {
+		formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
+		node.Name.Accept(formatter)
+	}
 
 	node.OpenParenthesisTkn = nil
 	node.CloseParenthesisTkn = nil
