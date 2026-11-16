@@ -142,7 +142,7 @@ func (lex *Lexer) Lex() *token.Token {
                 fbreak;
             };
             '<?' => {
-                lex.addFreeFloatingToken(tkn, token.T_OPEN_TAG, lex.ts, lex.te)
+                lex.addOpenTagToken(tkn)
                 fnext php;
             };
             '<?php'i ( [ \t] | newline ) => {

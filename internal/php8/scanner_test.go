@@ -405,6 +405,50 @@ func TestShebang(test *testing.T) {
 	assert.DeepEqual(test, expected, actual)
 }
 
+func TestOpenTagAtEnd(test *testing.T) {
+	src := `<?php echo 1 ?><?php`
+
+	config := conf.Config{
+		Version: &version.Version{
+			Major: 8,
+			Minor: 0,
+		},
+	}
+	lexer := NewLexer([]byte(src), config)
+
+	ids := []token.ID{}
+	var last *token.Token
+	for {
+		tkn := lexer.Lex()
+		if tkn.ID == 0 {
+			last = tkn
+			break
+		}
+		ids = append(ids, tkn.ID)
+	}
+
+	assert.DeepEqual(test, []token.ID{token.T_ECHO, token.T_LNUMBER, token.ID(';')}, ids)
+	assert.Equal(test, token.T_OPEN_TAG, last.FreeFloating[0].ID)
+	assert.Equal(test, "<?php", string(last.FreeFloating[0].Value))
+}
+
+func TestShortOpenTagBeforeName(test *testing.T) {
+	src := `<?phpinfo();`
+
+	config := conf.Config{
+		Version: &version.Version{
+			Major: 8,
+			Minor: 0,
+		},
+	}
+	lexer := NewLexer([]byte(src), config)
+
+	tkn := lexer.Lex()
+	assert.Equal(test, token.T_STRING, tkn.ID)
+	assert.Equal(test, "phpinfo", string(tkn.Value))
+	assert.Equal(test, "<?", string(tkn.FreeFloating[0].Value))
+}
+
 func TestShebangHtml(test *testing.T) {
 	src := `#!/usr/bin/env php
 <br/><?php
