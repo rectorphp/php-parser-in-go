@@ -145,6 +145,28 @@ func (formatter *formatter) Root(node *ast.Root) {
 	formatter.addIndent()
 
 	formatter.formatStmts(&node.Stmts)
+	formatter.dropTrailingOpenTag(node)
+}
+
+// dropTrailingOpenTag drops an open tag the end token holds, which follows
+// a closing tag the formatter made a semicolon: '?>\n<?php // c' would
+// print inside PHP code.
+func (formatter *formatter) dropTrailingOpenTag(node *ast.Root) {
+	if node.EndTkn == nil {
+		return
+	}
+	if len(node.Stmts) > 0 {
+		if _, html := node.Stmts[len(node.Stmts)-1].(*ast.StmtInlineHtml); html {
+			return
+		}
+	}
+	var kept []*token.Token
+	for _, t := range node.EndTkn.FreeFloating {
+		if t.ID != token.T_OPEN_TAG {
+			kept = append(kept, t)
+		}
+	}
+	node.EndTkn.FreeFloating = kept
 }
 
 func (formatter *formatter) Nullable(node *ast.Nullable) {
