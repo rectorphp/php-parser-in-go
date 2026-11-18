@@ -206,7 +206,9 @@ func (lex *Lexer) call(state int, fnext int) {
 
 func (lex *Lexer) ret(count int) {
 	lex.top = max(lex.top-count, 0)
-	lex.cs = lex.stack[lex.top]
+	if lex.top < len(lex.stack) {
+		lex.cs = lex.stack[lex.top]
+	}
 	lex.p++
 }
 
