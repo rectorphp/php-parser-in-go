@@ -688,6 +688,16 @@ func (formatter *formatter) StmtIf(node *ast.StmtIf) {
 	node.EndIfTkn = nil
 	node.SemiColonTkn = nil
 
+	// An else would bind into a body that ends with an if without one.
+	if len(node.ElseIf) > 0 || node.Else != nil {
+		node.Stmt = braceOpenIf(node.Stmt)
+	}
+	for i, elseIf := range node.ElseIf {
+		if elseIf, ok := elseIf.(*ast.StmtElseIf); ok && (i < len(node.ElseIf)-1 || node.Else != nil) {
+			elseIf.Stmt = braceOpenIf(elseIf.Stmt)
+		}
+	}
+
 	node.IfTkn = formatter.newToken(token.T_IF, []byte("if"))
 	formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
 
@@ -707,6 +717,43 @@ func (formatter *formatter) StmtIf(node *ast.StmtIf) {
 		formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
 		node.Else.Accept(formatter)
 	}
+}
+
+// braceOpenIf puts a body in braces where it ends with an if without an
+// else, out of braces, which an else after it would belong to.
+func braceOpenIf(body ast.Vertex) ast.Vertex {
+	if !opensElse(body) {
+		return body
+	}
+	return &ast.StmtStmtList{Stmts: []ast.Vertex{body}}
+}
+
+func opensElse(stmt ast.Vertex) bool {
+	switch n := stmt.(type) {
+	case *ast.StmtIf:
+		if n.Else != nil {
+			if elseStmt, ok := n.Else.(*ast.StmtElse); ok {
+				return opensElse(elseStmt.Stmt)
+			}
+			return false
+		}
+		if len(n.ElseIf) > 0 {
+			if elseIf, ok := n.ElseIf[len(n.ElseIf)-1].(*ast.StmtElseIf); ok {
+				return opensElse(elseIf.Stmt)
+			}
+			return false
+		}
+		return true
+	case *ast.StmtWhile:
+		return opensElse(n.Stmt)
+	case *ast.StmtFor:
+		return opensElse(n.Stmt)
+	case *ast.StmtForeach:
+		return opensElse(n.Stmt)
+	case *ast.StmtDeclare:
+		return opensElse(n.Stmt)
+	}
+	return false
 }
 
 func (formatter *formatter) StmtInlineHtml(node *ast.StmtInlineHtml) {
