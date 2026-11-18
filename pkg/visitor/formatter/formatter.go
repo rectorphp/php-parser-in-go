@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/rectorphp/php-parser-in-go/pkg/ast"
 	"github.com/rectorphp/php-parser-in-go/pkg/token"
+	"strconv"
 )
 
 type formatterState int
@@ -2345,12 +2346,73 @@ func (formatter *formatter) ScalarEncapsedStringBrackets(node *ast.ScalarEncapse
 	node.CloseCurlyBracketTkn = formatter.newToken('}', []byte("}"))
 }
 
+// ScalarHeredoc keeps the label a heredoc was written with, and whether it
+// is a nowdoc, whose body is not interpolated: a label the body holds at
+// the start of a line would end it there.
 func (formatter *formatter) ScalarHeredoc(node *ast.ScalarHeredoc) {
-	node.OpenHeredocTkn = formatter.newToken(token.T_START_HEREDOC, []byte("<<<EOT\n"))
+	label, nowdoc := heredocLabel(node.OpenHeredocTkn)
+	label = freeLabel(label, node.Parts)
+	open := "<<<" + label + "\n"
+	if nowdoc {
+		open = "<<<'" + label + "'\n"
+	}
+	node.OpenHeredocTkn = formatter.newToken(token.T_START_HEREDOC, []byte(open))
 	for _, part := range node.Parts {
 		part.Accept(formatter)
 	}
-	node.CloseHeredocTkn = formatter.newToken(token.T_START_HEREDOC, []byte("EOT"))
+	node.CloseHeredocTkn = formatter.newToken(token.T_END_HEREDOC, []byte(label))
+}
+
+// heredocLabel returns the label an opening <<<LABEL, <<<"LABEL" or
+// <<<'LABEL' token names, and whether it opens a nowdoc: EOT without one.
+func heredocLabel(open *token.Token) (string, bool) {
+	if open == nil {
+		return "EOT", false
+	}
+	value := bytes.TrimLeft(bytes.TrimPrefix(open.Value, []byte("<<<")), " \t")
+	value = bytes.TrimRight(value, "\r\n")
+	nowdoc := bytes.HasPrefix(value, []byte("'"))
+	value = bytes.Trim(value, "'\"")
+	if len(value) == 0 {
+		return "EOT", false
+	}
+	return string(value), nowdoc
+}
+
+// freeLabel returns label, or one made from it, that starts no line of the
+// heredoc's body as a whole word.
+func freeLabel(label string, parts []ast.Vertex) string {
+	var body []byte
+	for _, part := range parts {
+		if text, ok := part.(*ast.ScalarEncapsedStringPart); ok {
+			body = append(body, text.Value...)
+		}
+	}
+	candidate := label
+	for i := 1; endsHeredoc(body, candidate); i++ {
+		candidate = label + strconv.Itoa(i)
+	}
+	return candidate
+}
+
+// endsHeredoc reports whether a line of body would end a heredoc labelled
+// label: it starts, after indentation, with the label as a whole word.
+func endsHeredoc(body []byte, label string) bool {
+	for _, line := range bytes.Split(body, []byte("\n")) {
+		line = bytes.TrimLeft(line, " \t")
+		rest, ok := bytes.CutPrefix(line, []byte(label))
+		if !ok {
+			continue
+		}
+		if len(rest) == 0 {
+			return true
+		}
+		c := rest[0]
+		if !(c == '_' || c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= 0x80) {
+			return true
+		}
+	}
+	return false
 }
 
 func (formatter *formatter) ScalarLnumber(node *ast.ScalarLnumber) {
