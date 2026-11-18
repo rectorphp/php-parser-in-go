@@ -512,6 +512,7 @@ func (formatter *formatter) StmtElseIf(node *ast.StmtElseIf) {
 	node.ColonTkn = nil
 
 	node.ElseIfTkn = formatter.newToken(token.T_ELSEIF, []byte("elseif"))
+	formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
 
 	node.OpenParenthesisTkn = formatter.newToken('(', []byte("("))
 	node.Cond.Accept(formatter)
