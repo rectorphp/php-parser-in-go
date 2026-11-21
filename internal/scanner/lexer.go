@@ -73,7 +73,7 @@ func (lex *Lexer) addFreeFloatingToken(tkn *token.Token, tokenID token.ID, start
 
 func (lex *Lexer) isNotStringVar() bool {
 	position := lex.p
-	if lex.data[position-1] == '\\' && lex.data[position-2] != '\\' {
+	if lex.isEscaped(position) {
 		return true
 	}
 
@@ -92,9 +92,20 @@ func (lex *Lexer) isNotStringVar() bool {
 	return true
 }
 
+// isEscaped reports whether an odd run of backslashes precedes position,
+// so that the byte there is escaped: in "\\\"" the quote is escaped, in "\\" it is not.
+func (lex *Lexer) isEscaped(position int) bool {
+	backslashes := 0
+	for i := position - 1; i >= 0 && lex.data[i] == '\\'; i-- {
+		backslashes++
+	}
+
+	return backslashes%2 == 1
+}
+
 func (lex *Lexer) isNotStringEnd(quote byte) bool {
 	position := lex.p
-	if lex.data[position-1] == '\\' && lex.data[position-2] != '\\' {
+	if lex.isEscaped(position) {
 		return true
 	}
 
