@@ -154,6 +154,28 @@ func (formatter *formatter) Root(node *ast.Root) {
 	formatter.addIndent()
 
 	formatter.formatStmts(&node.Stmts)
+	formatter.dropTrailingOpenTag(node)
+}
+
+// dropTrailingOpenTag drops open tags left on the end token: the formatter
+// turned the preceding `?>` into `;`, so an open tag there would print
+// inside PHP code.
+func (formatter *formatter) dropTrailingOpenTag(node *ast.Root) {
+	if node.EndTkn == nil {
+		return
+	}
+	if len(node.Stmts) > 0 {
+		if _, isInlineHtml := node.Stmts[len(node.Stmts)-1].(*ast.StmtInlineHtml); isInlineHtml {
+			return
+		}
+	}
+	var kept []*token.Token
+	for _, freeFloating := range node.EndTkn.FreeFloating {
+		if freeFloating.ID != token.T_OPEN_TAG {
+			kept = append(kept, freeFloating)
+		}
+	}
+	node.EndTkn.FreeFloating = kept
 }
 
 func (formatter *formatter) Nullable(node *ast.Nullable) {
