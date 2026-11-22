@@ -56,7 +56,7 @@ func TestFormatter_Root_TrailingOpenTag(test *testing.T) {
 	printerValue := printer.NewPrinter(buffer)
 	node.Accept(printerValue)
 
-	expected := `<?php 
+	expected := `<?php
 
 ;// trailing`
 	actual := buffer.String()

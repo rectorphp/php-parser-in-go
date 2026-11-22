@@ -157,22 +157,22 @@ func (formatter *formatter) Root(node *ast.Root) {
 	formatter.dropTrailingOpenTag(node)
 }
 
-// dropTrailingOpenTag drops an open tag the end token holds, which follows
-// a closing tag the formatter made a semicolon: '?>\n<?php // c' would
-// print inside PHP code.
+// dropTrailingOpenTag drops open tags left on the end token: the formatter
+// turned the preceding `?>` into `;`, so an open tag there would print
+// inside PHP code.
 func (formatter *formatter) dropTrailingOpenTag(node *ast.Root) {
 	if node.EndTkn == nil {
 		return
 	}
 	if len(node.Stmts) > 0 {
-		if _, html := node.Stmts[len(node.Stmts)-1].(*ast.StmtInlineHtml); html {
+		if _, isInlineHtml := node.Stmts[len(node.Stmts)-1].(*ast.StmtInlineHtml); isInlineHtml {
 			return
 		}
 	}
 	var kept []*token.Token
-	for _, t := range node.EndTkn.FreeFloating {
-		if t.ID != token.T_OPEN_TAG {
-			kept = append(kept, t)
+	for _, freeFloating := range node.EndTkn.FreeFloating {
+		if freeFloating.ID != token.T_OPEN_TAG {
+			kept = append(kept, freeFloating)
 		}
 	}
 	node.EndTkn.FreeFloating = kept
