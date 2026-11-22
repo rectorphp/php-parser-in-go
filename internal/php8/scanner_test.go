@@ -2046,3 +2046,22 @@ func TestTripleDollar(test *testing.T) {
 	actual = string(tkn.Value)
 	assert.DeepEqual(test, expected, actual)
 }
+
+func TestUnmatchedClosingBraceKeepsState(test *testing.T) {
+	src := `<?php "{$a}"; } echo`
+
+	config := conf.Config{
+		Version: &version.Version{
+			Major: 7,
+			Minor: 4,
+		},
+	}
+	lexer := NewLexer([]byte(src), config)
+
+	var last *token.Token
+	for tkn := lexer.Lex(); tkn.ID != 0; tkn = lexer.Lex() {
+		last = tkn
+	}
+
+	assert.DeepEqual(test, token.T_ECHO, last.ID)
+}
