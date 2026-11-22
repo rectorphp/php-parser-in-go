@@ -61,9 +61,14 @@ func (formatter *formatter) getFreeFloating() []*token.Token {
 	defer formatter.resetFreeFloating()
 
 	if formatter.state == FormatterStateHTML {
+		// The tag needs whitespace after it: a newline that follows will do.
+		value := []byte("<?php ")
+		if len(formatter.freeFloating) > 0 && formatter.freeFloating[0].ID == token.T_WHITESPACE && bytes.HasPrefix(formatter.freeFloating[0].Value, []byte("\n")) {
+			value = []byte("<?php")
+		}
 		openTagToken := &token.Token{
 			ID:    token.T_OPEN_TAG,
-			Value: []byte("<?php "),
+			Value: value,
 		}
 		formatter.freeFloating = append([]*token.Token{openTagToken}, formatter.freeFloating...)
 
