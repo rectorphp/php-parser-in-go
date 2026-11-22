@@ -29,6 +29,7 @@ type classData struct {
 	isInterface        bool                            // set for an interface declaration, which is no class to extend
 	methods            map[string][]string             // method name -> declared parameter names (with leading $)
 	methodNodes        map[string]*ast.StmtClassMethod // method name -> declaring node, for body inspection
+	readsArguments     map[string]bool                 // method names whose body reads its arguments via func_get_args() and friends
 	visibility         map[string]string               // method name -> "public"/"protected"/"private"
 	traits             []string                        // fully qualified names of the traits used here
 	properties         map[string]bool                 // property names declared here (no leading $), promotion included
@@ -128,7 +129,8 @@ func (registry *Registry) LookupMethodParameterCount(classFQN, methodName string
 // LookupMethodParameterNames resolves methodName starting at classFQN and
 // walking up the parent chain, returning the declared parameter names (each with
 // its leading $). It fails (false) when a class in the chain is unknown,
-// ambiguous, or the method is not found. The seen set guards against cyclic
+// ambiguous, the method is not found, or its body reads arguments through
+// func_get_args() and friends. The seen set guards against cyclic
 // extends declarations.
 func (registry *Registry) LookupMethodParameterNames(classFQN, methodName string) ([]string, bool) {
 	seen := make(map[string]bool)
@@ -142,6 +144,11 @@ func (registry *Registry) LookupMethodParameterNames(classFQN, methodName string
 		}
 
 		if parameterNames, ok := data.methods[methodName]; ok {
+			// a method reading func_get_args() takes more arguments than it
+			// declares, so its parameter list says nothing about the call site
+			if data.readsArguments[methodName] {
+				return nil, false
+			}
 			return parameterNames, true
 		}
 
@@ -663,6 +670,7 @@ func (collector *classCollector) StmtClass(node *ast.StmtClass) {
 	data := &classData{
 		methods:            make(map[string][]string),
 		methodNodes:        make(map[string]*ast.StmtClassMethod),
+		readsArguments:     make(map[string]bool),
 		visibility:         make(map[string]string),
 		parent:             parentFQN,
 		interfaces:         collector.resolvedList(node.Implements),
@@ -699,6 +707,9 @@ func (collector *classCollector) StmtClass(node *ast.StmtClass) {
 		}
 
 		data.methods[methodName] = parameterNames(method.Params)
+		if readsArguments(method) {
+			data.readsArguments[methodName] = true
+		}
 	}
 
 	collector.registry.add(classFQN, data)
@@ -927,6 +938,48 @@ func (detector *selfInstantiationDetector) ExprNew(node *ast.ExprNew) {
 		return
 	}
 	if name, ok := detector.resolvedNames[node.Class]; ok && (name == "self" || name == "static") {
+		detector.found = true
+	}
+}
+
+// readsArguments reports whether the method body calls func_get_args(),
+// func_get_arg() or func_num_args(). Calls in nested closures count too, which
+// only makes the answer more conservative.
+func readsArguments(method *ast.StmtClassMethod) bool {
+	if method.Stmt == nil {
+		return false
+	}
+	detector := &argumentReaderDetector{Null: &visitor.Null{}}
+	traverser.NewTraverser(detector).Traverse(method.Stmt)
+	return detector.found
+}
+
+// argumentReaderDetector flags a func_get_args(), func_get_arg() or
+// func_num_args() call under the node it traverses.
+type argumentReaderDetector struct {
+	*visitor.Null
+	found bool
+}
+
+func (detector *argumentReaderDetector) ExprFunctionCall(node *ast.ExprFunctionCall) {
+	var parts []ast.Vertex
+	switch name := node.Function.(type) {
+	case *ast.Name:
+		parts = name.Parts
+	case *ast.NameFullyQualified:
+		parts = name.Parts
+	default:
+		return
+	}
+	if len(parts) != 1 {
+		return
+	}
+	namePart, ok := parts[0].(*ast.NamePart)
+	if !ok {
+		return
+	}
+	switch strings.ToLower(string(namePart.Value)) {
+	case "func_get_args", "func_get_arg", "func_num_args":
 		detector.found = true
 	}
 }

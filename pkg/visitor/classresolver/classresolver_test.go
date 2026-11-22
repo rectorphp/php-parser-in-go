@@ -628,3 +628,50 @@ class VendorClass
 		test.Error("expected the trait-only collect to leave classes out of the registry")
 	}
 }
+
+func TestRegistry_methodReadingFuncGetArgs(test *testing.T) {
+	registry := parse(test, `<?php
+class Logger
+{
+    private function log($message) { return implode(',', func_get_args()); }
+    private function count($message) { return \func_num_args(); }
+    private function second($message) { return FUNC_GET_ARG(1); }
+    private function nested($message) { return function () { return func_get_args(); }; }
+    private function plain($message) { return $message; }
+}
+
+class ChildLogger extends Logger {}`)
+
+	for _, methodName := range []string{"log", "count", "second", "nested"} {
+		if _, ok := registry.LookupMethodParameterNames("Logger", methodName); ok {
+			test.Errorf("expected %s() reading its arguments to be unresolvable", methodName)
+		}
+	}
+
+	if _, ok := registry.LookupMethodParameterNames("ChildLogger", "log"); ok {
+		test.Error("expected inherited log() reading its arguments to be unresolvable")
+	}
+
+	parameterNames, ok := registry.LookupMethodParameterNames("Logger", "plain")
+	if !ok || len(parameterNames) != 1 {
+		test.Errorf("expected plain() to keep 1 param, got %v (ok=%v)", parameterNames, ok)
+	}
+}
+
+func TestRegistry_descendantDeclaresMethodReadingFuncGetArgs(test *testing.T) {
+	registry := parse(test, `<?php
+class Base
+{
+    protected function log($message) {}
+}
+
+class Child extends Base
+{
+    protected function log($message) { return func_get_args(); }
+}`)
+
+	declared, resolvable := registry.DescendantDeclaresMethod("Base", "log")
+	if !declared || !resolvable {
+		test.Errorf("expected the override to stay declared, got declared=%v resolvable=%v", declared, resolvable)
+	}
+}
