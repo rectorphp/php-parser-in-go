@@ -7021,7 +7021,7 @@ func TestFormatter_ExprNew_EmptyAnonymousClass(test *testing.T) {
 	}
 }
 
-func TestFormatter_Class_FullyQualifiedParents(test *testing.T) {
+func TestFormatter_StmtClass_FullyQualifiedParents(test *testing.T) {
 	buffer := bytes.NewBufferString("")
 
 	node := &ast.StmtClass{
