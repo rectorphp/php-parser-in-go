@@ -73,32 +73,40 @@ func (lex *Lexer) addFreeFloatingToken(parentToken *token.Token, tokenID token.I
 
 func (lex *Lexer) isNotStringVar() bool {
 	position := lex.p
-	if lex.data[position-1] == '\\' && lex.data[position-2] != '\\' {
-		return true
-	}
-
 	if len(lex.data) < position+1 {
 		return true
 	}
 
+	// the backslash run is counted only for a candidate, keeping lexing linear
 	if lex.data[position] == '$' && (lex.data[position+1] == '{' || isValidVarNameStart(lex.data[position+1])) {
-		return false
+		return lex.isEscaped(position)
 	}
 
 	if lex.data[position] == '{' && lex.data[position+1] == '$' {
-		return false
+		return lex.isEscaped(position)
 	}
 
 	return true
 }
 
+// isEscaped reports whether an odd run of backslashes precedes position,
+// so that the byte there is escaped: in "\\\"" the quote is escaped, in "\\" it is not.
+func (lex *Lexer) isEscaped(position int) bool {
+	backslashes := 0
+	for i := position - 1; i >= 0 && lex.data[i] == '\\'; i-- {
+		backslashes++
+	}
+
+	return backslashes%2 == 1
+}
+
 func (lex *Lexer) isNotStringEnd(endChar byte) bool {
 	position := lex.p
-	if lex.data[position-1] == '\\' && lex.data[position-2] != '\\' {
+	if lex.data[position] != endChar {
 		return true
 	}
 
-	return !(lex.data[position] == endChar)
+	return lex.isEscaped(position)
 }
 
 // heredocFlexibleSince is PHP 7.3, when flexible heredoc/nowdoc syntax landed.
