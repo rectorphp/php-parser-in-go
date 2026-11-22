@@ -111,18 +111,18 @@ func (formatter *formatter) formatStmts(list *[]ast.Vertex) {
 		formatter.lastSemiColon = nil
 
 		if _, ok := statement.(*ast.StmtInlineHtml); ok {
-			if formatter.state == FormatterStateHTML {
-				// Nothing to close: the file starts with HTML, or more HTML
-				// follows.
-			} else if formatter.lastSemiColon != nil {
-				formatter.lastSemiColon.Value = append(formatter.lastSemiColon.Value, '?', '>')
-			} else {
-				*list = insert(*list, i+insertCounter, &ast.StmtNop{
-					SemiColonTkn: &token.Token{
-						Value: []byte("?>"),
-					},
-				})
-				insertCounter++
+			// Only open PHP code needs closing: not the start of a file, nor more HTML.
+			if formatter.state != FormatterStateHTML {
+				if formatter.lastSemiColon != nil {
+					formatter.lastSemiColon.Value = append(formatter.lastSemiColon.Value, '?', '>')
+				} else {
+					*list = insert(*list, i+insertCounter, &ast.StmtNop{
+						SemiColonTkn: &token.Token{
+							Value: []byte("?>"),
+						},
+					})
+					insertCounter++
+				}
 			}
 		} else {
 			formatter.addFreeFloating(token.T_WHITESPACE, []byte("\n"))

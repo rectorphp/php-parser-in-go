@@ -1812,7 +1812,7 @@ func TestFormatter_RootStartingWithInlineHtml(test *testing.T) {
 	printerValue := printer.NewPrinter(buffer)
 	node.Accept(printerValue)
 
-	expected := `<b><i><?php 
+	expected := `<b><i><?php
 echo $foo;?></b>`
 	actual := buffer.String()
 
