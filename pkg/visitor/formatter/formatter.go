@@ -1171,21 +1171,21 @@ func (formatter *formatter) ExprArrayDimFetch(node *ast.ExprArrayDimFetch) {
 // reads $$a['b'] as ${$a['b']} and $a->$b['c'] as $a->{$b['c']}, where
 // PHP 7 reads ${$a}['b'] and $a->{$b}['c'].
 func (formatter *formatter) braceDimensionBase(base ast.Vertex) {
-	switch n := base.(type) {
+	switch node := base.(type) {
 	case *ast.ExprVariable:
-		if _, ok := n.Name.(*ast.ExprVariable); ok {
-			n.OpenCurlyBracketTkn = formatter.newToken('{', []byte("{"))
-			n.CloseCurlyBracketTkn = formatter.newToken('}', []byte("}"))
+		if _, ok := node.Name.(*ast.ExprVariable); ok {
+			node.OpenCurlyBracketTkn = formatter.newToken('{', []byte("{"))
+			node.CloseCurlyBracketTkn = formatter.newToken('}', []byte("}"))
 		}
 	case *ast.ExprPropertyFetch:
-		if _, ok := n.Prop.(*ast.ExprVariable); ok {
-			n.OpenCurlyBracketTkn = formatter.newToken('{', []byte("{"))
-			n.CloseCurlyBracketTkn = formatter.newToken('}', []byte("}"))
+		if _, ok := node.Prop.(*ast.ExprVariable); ok {
+			node.OpenCurlyBracketTkn = formatter.newToken('{', []byte("{"))
+			node.CloseCurlyBracketTkn = formatter.newToken('}', []byte("}"))
 		}
 	case *ast.ExprNullsafePropertyFetch:
-		if _, ok := n.Prop.(*ast.ExprVariable); ok {
-			n.OpenCurlyBracketTkn = formatter.newToken('{', []byte("{"))
-			n.CloseCurlyBracketTkn = formatter.newToken('}', []byte("}"))
+		if _, ok := node.Prop.(*ast.ExprVariable); ok {
+			node.OpenCurlyBracketTkn = formatter.newToken('{', []byte("{"))
+			node.CloseCurlyBracketTkn = formatter.newToken('}', []byte("}"))
 		}
 	}
 }
