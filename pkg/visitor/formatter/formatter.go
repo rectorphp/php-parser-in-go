@@ -1271,9 +1271,9 @@ func (formatter *formatter) ExprClosure(node *ast.ExprClosure) {
 	if len(node.Uses) > 0 {
 		formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
 		node.UseTkn = formatter.newToken(token.T_USE, []byte("use"))
-		node.OpenParenthesisTkn = formatter.newToken('(', []byte("("))
-		node.SeparatorTkns = formatter.formatList(node.Uses, ',')
-		node.CloseParenthesisTkn = formatter.newToken(')', []byte(")"))
+		node.UseOpenParenthesisTkn = formatter.newToken('(', []byte("("))
+		node.UseSeparatorTkns = formatter.formatList(node.Uses, ',')
+		node.UseCloseParenthesisTkn = formatter.newToken(')', []byte(")"))
 	}
 
 	node.ColonTkn = nil
