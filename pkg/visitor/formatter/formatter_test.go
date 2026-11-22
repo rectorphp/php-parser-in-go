@@ -7020,3 +7020,121 @@ func TestFormatter_ExprNew_EmptyAnonymousClass(test *testing.T) {
 		test.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
 	}
 }
+
+func TestFormatter_StmtClass_FullyQualifiedParents(test *testing.T) {
+	buffer := bytes.NewBufferString("")
+
+	node := &ast.StmtClass{
+		Name: &ast.Identifier{
+			Value: []byte("foo"),
+		},
+		Extends: &ast.NameFullyQualified{
+			Parts: []ast.Vertex{
+				&ast.NamePart{
+					Value: []byte("bar"),
+				},
+			},
+		},
+		Implements: []ast.Vertex{
+			&ast.NameFullyQualified{
+				Parts: []ast.Vertex{
+					&ast.NamePart{
+						Value: []byte("baz"),
+					},
+				},
+			},
+		},
+		Stmts: []ast.Vertex{
+			&ast.StmtNop{},
+		},
+	}
+
+	formatterValue := formatter.NewFormatter().WithState(formatter.FormatterStatePHP).WithIndent(1)
+	node.Accept(formatterValue)
+
+	printerValue := printer.NewPrinter(buffer).WithState(printer.PrinterStatePHP)
+	node.Accept(printerValue)
+
+	expected := `class foo extends \bar implements \baz {
+        ;
+    }`
+	actual := buffer.String()
+
+	if expected != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
+
+func TestFormatter_StmtInterface_FullyQualifiedExtends(test *testing.T) {
+	buffer := bytes.NewBufferString("")
+
+	node := &ast.StmtInterface{
+		Name: &ast.Identifier{
+			Value: []byte("foo"),
+		},
+		Extends: []ast.Vertex{
+			&ast.NameFullyQualified{
+				Parts: []ast.Vertex{
+					&ast.NamePart{
+						Value: []byte("bar"),
+					},
+				},
+			},
+		},
+		Stmts: []ast.Vertex{
+			&ast.StmtNop{},
+		},
+	}
+
+	formatterValue := formatter.NewFormatter().WithState(formatter.FormatterStatePHP).WithIndent(1)
+	node.Accept(formatterValue)
+
+	printerValue := printer.NewPrinter(buffer).WithState(printer.PrinterStatePHP)
+	node.Accept(printerValue)
+
+	expected := `interface foo extends \bar {
+        ;
+    }`
+	actual := buffer.String()
+
+	if expected != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
+
+func TestFormatter_StmtEnum_FullyQualifiedImplements(test *testing.T) {
+	buffer := bytes.NewBufferString("")
+
+	node := &ast.StmtEnum{
+		Name: &ast.Identifier{
+			Value: []byte("foo"),
+		},
+		Implements: []ast.Vertex{
+			&ast.NameFullyQualified{
+				Parts: []ast.Vertex{
+					&ast.NamePart{
+						Value: []byte("bar"),
+					},
+				},
+			},
+		},
+		Stmts: []ast.Vertex{
+			&ast.StmtNop{},
+		},
+	}
+
+	formatterValue := formatter.NewFormatter().WithState(formatter.FormatterStatePHP).WithIndent(1)
+	node.Accept(formatterValue)
+
+	printerValue := printer.NewPrinter(buffer).WithState(printer.PrinterStatePHP)
+	node.Accept(printerValue)
+
+	expected := `enum foo implements \bar {
+        ;
+    }`
+	actual := buffer.String()
+
+	if expected != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
