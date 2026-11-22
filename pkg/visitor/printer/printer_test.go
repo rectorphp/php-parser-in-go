@@ -96,6 +96,26 @@ func TestPrinterPrintFileInlineHtml(test *testing.T) {
 	}
 }
 
+func TestPrinterPrintFileAdjacentInlineHtml(test *testing.T) {
+	buffer := bytes.NewBufferString("")
+
+	printerValue := printer.NewPrinter(buffer).WithState(printer.PrinterStatePHP)
+	node := &ast.Root{
+		Stmts: []ast.Vertex{
+			&ast.StmtInlineHtml{Value: []byte("<b>")},
+			&ast.StmtInlineHtml{Value: []byte("</b>")},
+		},
+	}
+	node.Accept(printerValue)
+
+	expected := `<b></b>`
+	actual := buffer.String()
+
+	if expected != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
+
 // node
 
 func TestPrinterPrintIdentifier(test *testing.T) {

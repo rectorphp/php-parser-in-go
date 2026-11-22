@@ -458,10 +458,12 @@ func (printer *printer) StmtIf(node *ast.StmtIf) {
 }
 
 func (printer *printer) StmtInlineHtml(node *ast.StmtInlineHtml) {
-	printer.state = PrinterStatePHP
-	if printer.last != nil && !bytes.HasSuffix(printer.last, []byte("?>")) && !bytes.HasSuffix(printer.last, []byte("?>\n")) {
+	// Only open PHP code needs closing: not the start of a file, nor HTML.
+	if printer.state == PrinterStatePHP && printer.last != nil && !bytes.HasSuffix(printer.last, []byte("?>")) && !bytes.HasSuffix(printer.last, []byte("?>\n")) {
 		printer.write([]byte("?>"))
 	}
+	// The HTML itself is written as is, without an open tag.
+	printer.state = PrinterStatePHP
 
 	printer.printToken(node.InlineHtmlTkn, node.Value)
 	printer.state = PrinterStateHTML
