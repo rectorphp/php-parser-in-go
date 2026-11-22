@@ -226,7 +226,9 @@ func (formatter *formatter) Argument(node *ast.Argument) {
 		node.AmpersandTkn = formatter.newToken('&', []byte("&"))
 	}
 
-	node.Expr.Accept(formatter)
+	if node.Expr != nil {
+		node.Expr.Accept(formatter)
+	}
 }
 
 func (formatter *formatter) Attribute(node *ast.Attribute) {
