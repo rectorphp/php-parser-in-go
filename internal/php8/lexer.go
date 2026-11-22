@@ -205,6 +205,11 @@ func (lex *Lexer) call(state int, fnext int) {
 }
 
 func (lex *Lexer) ret(count int) {
+	// an unmatched closing brace leaves the state alone, as Zend does
+	if lex.top == 0 {
+		lex.p++
+		return
+	}
 	lex.top = max(lex.top-count, 0)
 	lex.cs = lex.stack[lex.top]
 	lex.p++
