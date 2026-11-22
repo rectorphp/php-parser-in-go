@@ -743,29 +743,29 @@ func braceOpenIf(body ast.Vertex) ast.Vertex {
 }
 
 func opensElse(stmt ast.Vertex) bool {
-	switch n := stmt.(type) {
+	switch statement := stmt.(type) {
 	case *ast.StmtIf:
-		if n.Else != nil {
-			if elseStmt, ok := n.Else.(*ast.StmtElse); ok {
+		if statement.Else != nil {
+			if elseStmt, ok := statement.Else.(*ast.StmtElse); ok {
 				return opensElse(elseStmt.Stmt)
 			}
 			return false
 		}
-		if len(n.ElseIf) > 0 {
-			if elseIf, ok := n.ElseIf[len(n.ElseIf)-1].(*ast.StmtElseIf); ok {
+		if len(statement.ElseIf) > 0 {
+			if elseIf, ok := statement.ElseIf[len(statement.ElseIf)-1].(*ast.StmtElseIf); ok {
 				return opensElse(elseIf.Stmt)
 			}
 			return false
 		}
 		return true
 	case *ast.StmtWhile:
-		return opensElse(n.Stmt)
+		return opensElse(statement.Stmt)
 	case *ast.StmtFor:
-		return opensElse(n.Stmt)
+		return opensElse(statement.Stmt)
 	case *ast.StmtForeach:
-		return opensElse(n.Stmt)
+		return opensElse(statement.Stmt)
 	case *ast.StmtDeclare:
-		return opensElse(n.Stmt)
+		return opensElse(statement.Stmt)
 	}
 	return false
 }
