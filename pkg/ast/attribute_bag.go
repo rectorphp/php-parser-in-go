@@ -32,8 +32,9 @@ func (bag *AttributeBag) GetAttribute(key string) (any, bool) {
 	return value, ok
 }
 
-// Clone returns a bag with its own copy of the attributes, for a copied
-// node whose attributes must not change the original's.
-func (bag AttributeBag) Clone() AttributeBag {
+// CloneAttributes returns a bag with its own attribute map, for a copied
+// node whose attributes must not change the original's. The copy is shallow:
+// attribute values themselves (pointers, slices, maps) are shared.
+func (bag AttributeBag) CloneAttributes() AttributeBag {
 	return AttributeBag{attributes: maps.Clone(bag.attributes)}
 }

@@ -49,11 +49,11 @@ func TestNodeCarriesAttributes(test *testing.T) {
 	}
 }
 
-func TestAttributeBagClone(test *testing.T) {
+func TestAttributeBagCloneAttributes(test *testing.T) {
 	var bag AttributeBag
 	bag.SetAttribute("type", "User")
 
-	clone := bag.Clone()
+	clone := bag.CloneAttributes()
 	clone.SetAttribute("type", "Admin")
 	if value, _ := bag.GetAttribute("type"); value != "User" {
 		test.Fatalf("setting the clone changed the original: got %v", value)
@@ -63,7 +63,7 @@ func TestAttributeBagClone(test *testing.T) {
 	}
 
 	var empty AttributeBag
-	if clone := empty.Clone(); !clone.Equal(empty) {
+	if clone := empty.CloneAttributes(); !clone.Equal(empty) {
 		test.Fatal("the clone of an empty bag should equal it")
 	}
 }
