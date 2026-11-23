@@ -1672,3 +1672,28 @@ func TestParseAndPrintPHP8NamedArguments(test *testing.T) {
 		test.Errorf("\nexpected: %s\ngot: %s\n", src, actual)
 	}
 }
+
+func TestParseAndPrintPHP8PropertyHooks(test *testing.T) {
+	src := `<?php
+	abstract class A {
+		// before
+		public string $name = 'a' /* after default */ {
+			#[ Pure ] final get => $this -> name ;
+			set ( string $value , ) { $this -> name = $value ; }
+		}
+		abstract public array $items { & get ; set ; }
+		public $empty { }
+		public private(set) int $count ;
+		public function __construct (
+			public int $i { get => 1 ; } ,
+			protected(set) int $j = 2 { set => $value ; } ,
+		) { }
+	}
+	interface HasName { public string $name { get ; } }`
+
+	actual := printPHP8(parsePHP8Real(src))
+
+	if src != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", src, actual)
+	}
+}

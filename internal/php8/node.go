@@ -133,3 +133,20 @@ func (traitMethodRef *TraitMethodRef) Accept(visitor ast.Visitor) {
 func (traitMethodRef *TraitMethodRef) GetPosition() *position.Position {
 	return traitMethodRef.Position
 }
+
+// PropertyHookList node
+type PropertyHookList struct {
+	ast.AttributeBag
+	Position             *position.Position
+	OpenCurlyBracketTkn  *token.Token
+	Hooks                []ast.Vertex
+	CloseCurlyBracketTkn *token.Token
+}
+
+func (propertyHookList *PropertyHookList) Accept(visitor ast.Visitor) {
+	// do nothing
+}
+
+func (propertyHookList *PropertyHookList) GetPosition() *position.Position {
+	return propertyHookList.Position
+}

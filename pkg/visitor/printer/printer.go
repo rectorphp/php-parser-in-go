@@ -173,6 +173,25 @@ func (printer *printer) Parameter(node *ast.Parameter) {
 	printer.printNode(node.Var)
 	printer.printToken(node.EqualTkn, printer.ifNode(node.DefaultValue, []byte("=")))
 	printer.printNode(node.DefaultValue)
+	printer.printToken(node.OpenCurlyBracketTkn, printer.ifNodeList(node.Hooks, []byte("{")))
+	printer.printList(node.Hooks)
+	printer.printToken(node.CloseCurlyBracketTkn, printer.ifNodeList(node.Hooks, []byte("}")))
+}
+
+func (printer *printer) PropertyHook(node *ast.PropertyHook) {
+	printer.printList(node.AttrGroups)
+	printer.printList(node.Modifiers)
+	printer.printToken(node.AmpersandTkn, nil)
+	printer.printNode(node.Name)
+	printer.printToken(node.OpenParenthesisTkn, printer.ifNodeList(node.Params, []byte("(")))
+	printer.printSeparatedList(node.Params, node.SeparatorTkns, []byte(","))
+	printer.printToken(node.CloseParenthesisTkn, printer.ifNodeList(node.Params, []byte(")")))
+	printer.printToken(node.DoubleArrowTkn, printer.ifNode(node.Expr, []byte("=>")))
+	printer.printNode(node.Expr)
+	printer.printNode(node.Stmt)
+	if node.Stmt == nil {
+		printer.printToken(node.SemiColonTkn, []byte(";"))
+	}
 }
 
 func (printer *printer) Identifier(node *ast.Identifier) {
@@ -531,7 +550,10 @@ func (printer *printer) StmtPropertyList(node *ast.StmtPropertyList) {
 	printer.printList(node.Modifiers)
 	printer.printNode(node.Type)
 	printer.printSeparatedList(node.Props, node.SeparatorTkns, []byte(","))
-	printer.printToken(node.SemiColonTkn, []byte(";"))
+	printer.printToken(node.OpenCurlyBracketTkn, printer.ifNodeList(node.Hooks, []byte("{")))
+	printer.printList(node.Hooks)
+	printer.printToken(node.CloseCurlyBracketTkn, printer.ifNodeList(node.Hooks, []byte("}")))
+	printer.printToken(node.SemiColonTkn, printer.ifNotNodeList(node.Hooks, []byte(";")))
 }
 
 func (printer *printer) StmtReturn(node *ast.StmtReturn) {

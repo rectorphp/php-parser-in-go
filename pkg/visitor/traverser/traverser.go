@@ -62,6 +62,26 @@ func (traverser *Traverser) Parameter(node *ast.Parameter) {
 	traverser.Traverse(node.Type)
 	traverser.Traverse(node.Var)
 	traverser.Traverse(node.DefaultValue)
+	for _, childNode := range node.Hooks {
+		traverser.Traverse(childNode)
+	}
+}
+
+func (traverser *Traverser) PropertyHook(node *ast.PropertyHook) {
+	node.Accept(traverser.v)
+
+	for _, childNode := range node.AttrGroups {
+		traverser.Traverse(childNode)
+	}
+	for _, childNode := range node.Modifiers {
+		traverser.Traverse(childNode)
+	}
+	traverser.Traverse(node.Name)
+	for _, childNode := range node.Params {
+		traverser.Traverse(childNode)
+	}
+	traverser.Traverse(node.Expr)
+	traverser.Traverse(node.Stmt)
 }
 
 func (traverser *Traverser) Identifier(node *ast.Identifier) {

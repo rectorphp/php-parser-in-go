@@ -41,6 +41,10 @@ func (visitor *Null) Parameter(_ *ast.Parameter) {
 	// do nothing
 }
 
+func (visitor *Null) PropertyHook(_ *ast.PropertyHook) {
+	// do nothing
+}
+
 func (visitor *Null) Identifier(_ *ast.Identifier) {
 	// do nothing
 }

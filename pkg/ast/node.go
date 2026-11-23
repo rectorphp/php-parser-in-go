@@ -86,6 +86,11 @@ type Parameter struct {
 	Var          Vertex
 	EqualTkn     *token.Token
 	DefaultValue Vertex
+	// OpenCurlyBracketTkn, Hooks and CloseCurlyBracketTkn hold the property
+	// hooks of a constructor-promoted parameter; Hooks is nil when it has none.
+	OpenCurlyBracketTkn  *token.Token
+	Hooks                []Vertex
+	CloseCurlyBracketTkn *token.Token
 }
 
 func (node *Parameter) Accept(visitor Visitor) {
@@ -93,6 +98,34 @@ func (node *Parameter) Accept(visitor Visitor) {
 }
 
 func (node *Parameter) GetPosition() *position.Position {
+	return node.Position
+}
+
+// PropertyHook node: a `get` or `set` hook of a property. The body is either
+// Stmt (a statement list), DoubleArrowTkn and Expr closed by SemiColonTkn, or
+// a lone SemiColonTkn for an abstract hook.
+type PropertyHook struct {
+	AttributeBag
+	Position            *position.Position
+	AttrGroups          []Vertex
+	Modifiers           []Vertex
+	AmpersandTkn        *token.Token
+	Name                Vertex
+	OpenParenthesisTkn  *token.Token
+	Params              []Vertex
+	SeparatorTkns       []*token.Token
+	CloseParenthesisTkn *token.Token
+	DoubleArrowTkn      *token.Token
+	Expr                Vertex
+	Stmt                Vertex
+	SemiColonTkn        *token.Token
+}
+
+func (node *PropertyHook) Accept(visitor Visitor) {
+	visitor.PropertyHook(node)
+}
+
+func (node *PropertyHook) GetPosition() *position.Position {
 	return node.Position
 }
 
@@ -980,6 +1013,11 @@ type StmtPropertyList struct {
 	Props         []Vertex
 	SeparatorTkns []*token.Token
 	SemiColonTkn  *token.Token
+	// OpenCurlyBracketTkn, Hooks and CloseCurlyBracketTkn hold the property
+	// hooks; Hooks is nil for a plain property list, which ends in SemiColonTkn.
+	OpenCurlyBracketTkn  *token.Token
+	Hooks                []Vertex
+	CloseCurlyBracketTkn *token.Token
 }
 
 func (node *StmtPropertyList) Accept(visitor Visitor) {

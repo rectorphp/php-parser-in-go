@@ -224,6 +224,31 @@ func (dumper *Dumper) Parameter(node *ast.Parameter) {
 	dumper.dumpVertex("Var", node.Var)
 	dumper.dumpToken("EqualTkn", node.EqualTkn)
 	dumper.dumpVertex("DefaultValue", node.DefaultValue)
+	dumper.dumpToken("OpenCurlyBracketTkn", node.OpenCurlyBracketTkn)
+	dumper.dumpVertexList("Hooks", node.Hooks)
+	dumper.dumpToken("CloseCurlyBracketTkn", node.CloseCurlyBracketTkn)
+
+	dumper.indent--
+	dumper.print(dumper.indent, "},\n")
+}
+
+func (dumper *Dumper) PropertyHook(node *ast.PropertyHook) {
+	dumper.print(0, "&ast.PropertyHook{\n")
+	dumper.indent++
+
+	dumper.dumpPosition(node.Position)
+	dumper.dumpVertexList("AttrGroups", node.AttrGroups)
+	dumper.dumpVertexList("Modifiers", node.Modifiers)
+	dumper.dumpToken("AmpersandTkn", node.AmpersandTkn)
+	dumper.dumpVertex("Name", node.Name)
+	dumper.dumpToken("OpenParenthesisTkn", node.OpenParenthesisTkn)
+	dumper.dumpVertexList("Params", node.Params)
+	dumper.dumpTokenList("SeparatorTkns", node.SeparatorTkns)
+	dumper.dumpToken("CloseParenthesisTkn", node.CloseParenthesisTkn)
+	dumper.dumpToken("DoubleArrowTkn", node.DoubleArrowTkn)
+	dumper.dumpVertex("Expr", node.Expr)
+	dumper.dumpVertex("Stmt", node.Stmt)
+	dumper.dumpToken("SemiColonTkn", node.SemiColonTkn)
 
 	dumper.indent--
 	dumper.print(dumper.indent, "},\n")
@@ -818,6 +843,9 @@ func (dumper *Dumper) StmtPropertyList(node *ast.StmtPropertyList) {
 	dumper.dumpVertexList("Props", node.Props)
 	dumper.dumpTokenList("SeparatorTkns", node.SeparatorTkns)
 	dumper.dumpToken("SemiColonTkn", node.SemiColonTkn)
+	dumper.dumpToken("OpenCurlyBracketTkn", node.OpenCurlyBracketTkn)
+	dumper.dumpVertexList("Hooks", node.Hooks)
+	dumper.dumpToken("CloseCurlyBracketTkn", node.CloseCurlyBracketTkn)
 
 	dumper.indent--
 	dumper.print(dumper.indent, "},\n")

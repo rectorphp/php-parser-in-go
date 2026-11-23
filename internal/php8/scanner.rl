@@ -259,9 +259,12 @@ func (lex *Lexer) Lex() *token.Token {
             'list'i                           => {lex.setTokenPosition(tkn); tok = token.T_LIST; fbreak;};
             'namespace'i                      => {lex.setTokenPosition(tkn); tok = token.T_NAMESPACE; fbreak;};
             'private'i                        => {lex.setTokenPosition(tkn); tok = token.T_PRIVATE; fbreak;};
+            'private(set)'i                   => {lex.setTokenPosition(tkn); tok = token.T_PRIVATE_SET; fbreak;};
             'public'i                         => {lex.setTokenPosition(tkn); tok = token.T_PUBLIC; fbreak;};
+            'public(set)'i                    => {lex.setTokenPosition(tkn); tok = token.T_PUBLIC_SET; fbreak;};
             'print'i                          => {lex.setTokenPosition(tkn); tok = token.T_PRINT; fbreak;};
             'protected'i                      => {lex.setTokenPosition(tkn); tok = token.T_PROTECTED; fbreak;};
+            'protected(set)'i                 => {lex.setTokenPosition(tkn); tok = token.T_PROTECTED_SET; fbreak;};
             'readonly'i                       => {lex.setTokenPosition(tkn); tok = token.T_READONLY; fbreak;};
             'return'i                         => {lex.setTokenPosition(tkn); tok = token.T_RETURN; fbreak;};
             'static'i                         => {lex.setTokenPosition(tkn); tok = token.T_STATIC; fbreak;};
