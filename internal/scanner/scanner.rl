@@ -448,7 +448,7 @@ func (lex *Lexer) Lex() *token.Token {
         string_var := |*
             '$' varname        => {lex.setTokenPosition(tkn); tok = token.T_VARIABLE; fbreak;};
             '->' varname_first => {lex.ungetCnt(1); lex.setTokenPosition(tkn); tok = token.T_OBJECT_OPERATOR; fbreak;};
-            varname            => {lex.setTokenPosition(tkn); tok = token.T_STRING; fbreak;};
+            varname            => {lex.setTokenPosition(tkn); tok = token.T_STRING; lex.ret(1); goto _out;};
             '['                => {lex.setTokenPosition(tkn); tok = token.ID(int('[')); lex.call(ftargs, fentry(string_var_index)); goto _out;};
             any                => {lex.ungetCnt(1); fret;};
         *|;

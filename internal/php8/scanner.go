@@ -23990,11 +23990,8 @@ func (lex *Lexer) Lex() *token.Token {
 		{
 			lex.setTokenPosition(tkn)
 			tok = token.T_STRING
-			{
-				(lex.p)++
-				lex.cs = 520
-				goto _out
-			}
+			lex.ret(1)
+			goto _out
 		}
 		goto st520
 	st520:
