@@ -313,6 +313,17 @@ EAP;
 	}
 }
 
+// A flexible heredoc closed mid-line prints back byte for byte.
+func TestParseAndPrintPHP8InlineHeredoc(test *testing.T) {
+	src := "<?php\nfoo(<<<EOT\n  x\n  EOT, 1);\nfoo(<<<EOT\n  x\n  EOT)->bar();\n"
+
+	actual := printPHP8(parsePHP8(src))
+
+	if src != actual {
+		test.Errorf("\nexpected: %q\ngot: %q\n", src, actual)
+	}
+}
+
 // test assign
 
 func TestParseAndPrintPHP8Assign(test *testing.T) {

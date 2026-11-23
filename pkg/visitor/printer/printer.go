@@ -2,10 +2,9 @@ package printer
 
 import (
 	"bytes"
-	"io"
-
 	"github.com/rectorphp/php-parser-in-go/pkg/ast"
 	"github.com/rectorphp/php-parser-in-go/pkg/token"
+	"io"
 )
 
 type printerState int
@@ -19,9 +18,6 @@ type printer struct {
 	output io.Writer
 	state  printerState
 	last   []byte
-	// heredocClosed is set after a heredoc's closing label: before PHP 7.3
-	// nothing but a semicolon may follow it on its line.
-	heredocClosed bool
 }
 
 func NewPrinter(output io.Writer) *printer {
@@ -59,13 +55,6 @@ func (printer *printer) write(content []byte) {
 			printer.output.Write([]byte("<?php "))
 		}
 		printer.state = PrinterStatePHP
-	}
-
-	if printer.heredocClosed {
-		printer.heredocClosed = false
-		if content[0] != ';' && content[0] != '\n' && content[0] != '\r' {
-			printer.output.Write([]byte("\n"))
-		}
 	}
 
 	if printer.last != nil && isValidVarName(printer.last[len(printer.last)-1]) && isValidVarName(content[0]) {
@@ -343,6 +332,7 @@ func (printer *printer) StmtDo(node *ast.StmtDo) {
 	printer.printNode(node.Cond)
 	printer.printToken(node.CloseParenthesisTkn, []byte(")"))
 	printer.printToken(node.SemiColonTkn, []byte(";"))
+
 }
 
 func (printer *printer) StmtEcho(node *ast.StmtEcho) {
@@ -1344,7 +1334,6 @@ func (printer *printer) ScalarHeredoc(node *ast.ScalarHeredoc) {
 	printer.printToken(node.OpenHeredocTkn, []byte("<<<EOT\n"))
 	printer.printList(node.Parts)
 	printer.printToken(node.CloseHeredocTkn, []byte("EOT"))
-	printer.heredocClosed = true
 }
 
 func (printer *printer) ScalarLnumber(node *ast.ScalarLnumber) {

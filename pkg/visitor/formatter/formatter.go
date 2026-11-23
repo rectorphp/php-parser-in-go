@@ -20,6 +20,9 @@ type formatter struct {
 	freeFloating []*token.Token
 
 	lastSemiColon *token.Token
+	// heredocClosed is set after a heredoc's closing label: before PHP 7.3
+	// nothing but a semicolon may follow it on its line.
+	heredocClosed bool
 }
 
 func NewFormatter() *formatter {
@@ -80,6 +83,13 @@ func (formatter *formatter) getFreeFloating() []*token.Token {
 }
 
 func (formatter *formatter) newToken(tokenID token.ID, value []byte) *token.Token {
+	if formatter.heredocClosed {
+		formatter.heredocClosed = false
+		if tokenID != ';' {
+			formatter.freeFloating = append([]*token.Token{{ID: token.T_WHITESPACE, Value: []byte("\n")}}, formatter.freeFloating...)
+		}
+	}
+
 	return &token.Token{
 		ID:           tokenID,
 		Value:        value,
@@ -2361,6 +2371,7 @@ func (formatter *formatter) ScalarHeredoc(node *ast.ScalarHeredoc) {
 		part.Accept(formatter)
 	}
 	node.CloseHeredocTkn = formatter.newToken(token.T_END_HEREDOC, []byte(label))
+	formatter.heredocClosed = true
 }
 
 // heredocLabel returns the label an opening <<<LABEL, <<<"LABEL" or
@@ -2407,8 +2418,8 @@ func endsHeredoc(body []byte, label string) bool {
 		if len(rest) == 0 {
 			return true
 		}
-		c := rest[0]
-		if c != '_' && (c < '0' || c > '9') && (c < 'a' || c > 'z') && (c < 'A' || c > 'Z') && c < 0x80 {
+		next := rest[0]
+		if next != '_' && (next < '0' || next > '9') && (next < 'a' || next > 'z') && (next < 'A' || next > 'Z') && next < 0x80 {
 			return true
 		}
 	}
