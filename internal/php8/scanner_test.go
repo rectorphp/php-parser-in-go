@@ -1,8 +1,10 @@
 package php8
 
 import (
-	"gotest.tools/assert"
+	"strings"
 	"testing"
+
+	"gotest.tools/assert"
 
 	"github.com/rectorphp/php-parser-in-go/pkg/conf"
 	"github.com/rectorphp/php-parser-in-go/pkg/errors"
@@ -2240,15 +2242,15 @@ func TestLoneCarriageReturn(test *testing.T) {
 	var actual []lexed
 	for {
 		tkn := lexer.Lex()
-		freeFloating := ""
-		for _, ff := range tkn.FreeFloating {
-			freeFloating += string(ff.Value)
+		var freeFloating strings.Builder
+		for _, freeFloatingToken := range tkn.FreeFloating {
+			freeFloating.WriteString(string(freeFloatingToken.Value))
 		}
 		if tkn.ID == 0 {
-			actual = append(actual, lexed{FreeFloating: freeFloating})
+			actual = append(actual, lexed{FreeFloating: freeFloating.String()})
 			break
 		}
-		actual = append(actual, lexed{ID: tkn.ID, Value: string(tkn.Value), StartLine: tkn.Position.StartLine, FreeFloating: freeFloating})
+		actual = append(actual, lexed{ID: tkn.ID, Value: string(tkn.Value), StartLine: tkn.Position.StartLine, FreeFloating: freeFloating.String()})
 	}
 
 	assert.DeepEqual(test, expected, actual)
