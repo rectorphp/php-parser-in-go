@@ -559,6 +559,33 @@ func TestParseAndPrintPHP8ArrowFunction(test *testing.T) {
 	}
 }
 
+func TestParseAndPrintPHP8AttributedClosure(test *testing.T) {
+	src := `<?php
+	$a  = /* c */ #[ Foo ] #[ Bar ( 1 ) ] static function & ( ) : void {
+		// do nothing
+	} ;
+	`
+
+	actual := printPHP8(parsePHP8Real(src))
+
+	if src != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", src, actual)
+	}
+}
+
+func TestParseAndPrintPHP8AttributedArrowFunction(test *testing.T) {
+	src := `<?php
+	$a = #[ Foo ]
+	static fn & ( $b ) : void => $c ;
+	`
+
+	actual := printPHP8(parsePHP8Real(src))
+
+	if src != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", src, actual)
+	}
+}
+
 func TestParseAndPrintPHP8ConstFetch(test *testing.T) {
 	src := `<?php
 	null ;

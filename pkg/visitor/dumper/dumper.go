@@ -1154,6 +1154,7 @@ func (dumper *Dumper) ExprArrowFunction(node *ast.ExprArrowFunction) {
 	dumper.indent++
 
 	dumper.dumpPosition(node.Position)
+	dumper.dumpVertexList("AttrGroups", node.AttrGroups)
 	dumper.dumpToken("StaticTkn", node.StaticTkn)
 	dumper.dumpToken("FnTkn", node.FnTkn)
 	dumper.dumpToken("AmpersandTkn", node.AmpersandTkn)
@@ -1249,6 +1250,7 @@ func (dumper *Dumper) ExprClosure(node *ast.ExprClosure) {
 	dumper.indent++
 
 	dumper.dumpPosition(node.Position)
+	dumper.dumpVertexList("AttrGroups", node.AttrGroups)
 	dumper.dumpToken("StaticTkn", node.StaticTkn)
 	dumper.dumpToken("FunctionTkn", node.FunctionTkn)
 	dumper.dumpToken("AmpersandTkn", node.AmpersandTkn)

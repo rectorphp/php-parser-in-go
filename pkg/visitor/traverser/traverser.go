@@ -595,6 +595,9 @@ func (traverser *Traverser) ExprArrayItem(node *ast.ExprArrayItem) {
 func (traverser *Traverser) ExprArrowFunction(node *ast.ExprArrowFunction) {
 	node.Accept(traverser.v)
 
+	for _, childNode := range node.AttrGroups {
+		childNode.Accept(traverser)
+	}
 	for _, childNode := range node.Params {
 		childNode.Accept(traverser)
 	}
@@ -642,6 +645,9 @@ func (traverser *Traverser) ExprThrow(node *ast.ExprThrow) {
 func (traverser *Traverser) ExprClosure(node *ast.ExprClosure) {
 	node.Accept(traverser.v)
 
+	for _, childNode := range node.AttrGroups {
+		childNode.Accept(traverser)
+	}
 	for _, childNode := range node.Params {
 		childNode.Accept(traverser)
 	}

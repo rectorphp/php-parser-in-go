@@ -4085,6 +4085,34 @@ expr_without_variable:
 
                 $$ = $2
             }
+    |   attributes inline_function
+            {
+                switch n := $2.(type) {
+                case *ast.ExprClosure :
+                    n.Position = yylex.(*Parser).builder.NewNodeListNodePosition($1, $2)
+                    n.AttrGroups = $1;
+                case *ast.ExprArrowFunction :
+                    n.Position = yylex.(*Parser).builder.NewNodeListNodePosition($1, $2)
+                    n.AttrGroups = $1;
+                };
+
+                $$ = $2
+            }
+    |   attributes T_STATIC inline_function
+            {
+                switch n := $3.(type) {
+                case *ast.ExprClosure :
+                    n.Position = yylex.(*Parser).builder.NewNodeListNodePosition($1, $3)
+                    n.AttrGroups = $1;
+                    n.StaticTkn = $2;
+                case *ast.ExprArrowFunction :
+                    n.Position = yylex.(*Parser).builder.NewNodeListNodePosition($1, $3)
+                    n.AttrGroups = $1;
+                    n.StaticTkn = $2;
+                };
+
+                $$ = $3
+            }
 ;
 
 inline_function:

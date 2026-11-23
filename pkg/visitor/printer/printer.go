@@ -721,6 +721,7 @@ func (printer *printer) ExprArrayItem(node *ast.ExprArrayItem) {
 }
 
 func (printer *printer) ExprArrowFunction(node *ast.ExprArrowFunction) {
+	printer.printList(node.AttrGroups)
 	printer.printToken(node.StaticTkn, nil)
 	printer.printToken(node.FnTkn, []byte("fn"))
 	printer.printToken(node.AmpersandTkn, nil)
@@ -766,6 +767,7 @@ func (printer *printer) ExprThrow(node *ast.ExprThrow) {
 }
 
 func (printer *printer) ExprClosure(node *ast.ExprClosure) {
+	printer.printList(node.AttrGroups)
 	printer.printToken(node.StaticTkn, nil)
 	printer.printToken(node.FunctionTkn, []byte("function"))
 	printer.printToken(node.AmpersandTkn, nil)
