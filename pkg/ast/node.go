@@ -1423,6 +1423,7 @@ func (node *ExprArrayItem) GetPosition() *position.Position {
 type ExprArrowFunction struct {
 	AttributeBag
 	Position            *position.Position
+	AttrGroups          []Vertex
 	StaticTkn           *token.Token
 	FnTkn               *token.Token
 	AmpersandTkn        *token.Token
@@ -1529,6 +1530,7 @@ func (node *ExprClone) GetPosition() *position.Position {
 type ExprClosure struct {
 	AttributeBag
 	Position               *position.Position
+	AttrGroups             []Vertex
 	StaticTkn              *token.Token
 	FunctionTkn            *token.Token
 	AmpersandTkn           *token.Token
