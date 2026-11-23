@@ -56,6 +56,27 @@ func (lex *Lexer) Lex() *token.Token {
         whitespace = [\t\v\f ];
         whitespace_line = [\t\v\f ] | newline;
 
+        line_comment = (('#' ^'[') | '//') any_line* when is_not_comment_end;
+        block_comment = '/*' any_line* :>> '*/';
+
+        action add_line_comment {
+            lex.ungetStr("?>")
+            lex.addFreeFloatingToken(tkn, token.T_COMMENT, lex.ts, lex.te)
+        }
+
+        action add_block_comment {
+            isDocComment := false;
+            if lex.te - lex.ts > 4 && string(lex.data[lex.ts:lex.ts+3]) == "/**" {
+                isDocComment = true;
+            }
+
+            if isDocComment {
+                lex.addFreeFloatingToken(tkn, token.T_DOC_COMMENT, lex.ts, lex.te)
+            } else {
+                lex.addFreeFloatingToken(tkn, token.T_COMMENT, lex.ts, lex.te)
+            }
+        }
+
         lnum = [0-9]+('_'[0-9]+)*;
         dnum = (lnum?"." lnum)|(lnum"."lnum?);
         hnum = '0x'[0-9a-fA-F]+('_'[0-9a-fA-F]+)*;
@@ -337,25 +358,11 @@ func (lex *Lexer) Lex() *token.Token {
             '(' whitespace* ('string'i|'binary'i) whitespace* ')' => {lex.setTokenPosition(tkn); tok = token.T_STRING_CAST; fbreak;};
             '(' whitespace* 'unset'i whitespace* ')'              => {lex.setTokenPosition(tkn); tok = token.T_UNSET_CAST; fbreak;};
 
-            (('#' ^'[') | '//') any_line* when is_not_comment_end => {
-                lex.ungetStr("?>")
-                lex.addFreeFloatingToken(tkn, token.T_COMMENT, lex.ts, lex.te)
-            };
+            line_comment => add_line_comment;
             '#' => {
                 lex.addFreeFloatingToken(tkn, token.T_COMMENT, lex.ts, lex.te)
             };
-            '/*' any_line* :>> '*/' {
-                isDocComment := false;
-                if lex.te - lex.ts > 4 && string(lex.data[lex.ts:lex.ts+3]) == "/**" {
-                    isDocComment = true;
-                }
-
-                if isDocComment {
-                    lex.addFreeFloatingToken(tkn, token.T_DOC_COMMENT, lex.ts, lex.te)
-                } else {
-                    lex.addFreeFloatingToken(tkn, token.T_COMMENT, lex.ts, lex.te)
-                }
-            };
+            block_comment => add_block_comment;
 
             operators => {
                 lex.setTokenPosition(tkn);
@@ -500,18 +507,24 @@ func (lex *Lexer) Lex() *token.Token {
 
         halt_compiller_open_parenthesis := |*
             whitespace_line* => {lex.addFreeFloatingToken(tkn, token.T_WHITESPACE, lex.ts, lex.te)};
+            line_comment     => add_line_comment;
+            block_comment    => add_block_comment;
             "("              => {lex.setTokenPosition(tkn); tok = token.ID(int('(')); fnext halt_compiller_close_parenthesis; fbreak;};
             any              => {lex.ungetCnt(1); fnext php;};
         *|;
 
         halt_compiller_close_parenthesis := |*
             whitespace_line* => {lex.addFreeFloatingToken(tkn, token.T_WHITESPACE, lex.ts, lex.te)};
+            line_comment     => add_line_comment;
+            block_comment    => add_block_comment;
             ")"              => {lex.setTokenPosition(tkn); tok = token.ID(int(')')); fnext halt_compiller_close_semicolon; fbreak;};
             any              => {lex.ungetCnt(1); fnext php;};
         *|;
 
         halt_compiller_close_semicolon := |*
             whitespace_line* => {lex.addFreeFloatingToken(tkn, token.T_WHITESPACE, lex.ts, lex.te)};
+            line_comment     => add_line_comment;
+            block_comment    => add_block_comment;
             ";"              => {lex.setTokenPosition(tkn); tok = token.ID(int(';')); fnext halt_compiller_end; fbreak;};
             any              => {lex.ungetCnt(1); fnext php;};
         *|;
