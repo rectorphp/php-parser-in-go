@@ -2420,7 +2420,7 @@ func (lex *Lexer) Lex() *token.Token {
 		// line internal/php8/scanner.rl:144
 		(lex.p) = (lex.te) - 1
 		{
-			lex.addFreeFloatingToken(tkn, token.T_OPEN_TAG, lex.ts, lex.te)
+			lex.addOpenTagToken(tkn)
 			lex.cs = 123
 		}
 		goto _again
@@ -2472,7 +2472,7 @@ func (lex *Lexer) Lex() *token.Token {
 		lex.te = (lex.p)
 		(lex.p)--
 		{
-			lex.addFreeFloatingToken(tkn, token.T_OPEN_TAG, lex.ts, lex.te)
+			lex.addOpenTagToken(tkn)
 			lex.cs = 123
 		}
 		goto _again
@@ -24164,11 +24164,8 @@ func (lex *Lexer) Lex() *token.Token {
 		{
 			lex.setTokenPosition(tkn)
 			tok = token.T_STRING
-			{
-				(lex.p)++
-				lex.cs = 520
-				goto _out
-			}
+			lex.ret(1)
+			goto _out
 		}
 		goto st520
 	st520:
