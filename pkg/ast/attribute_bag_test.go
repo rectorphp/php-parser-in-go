@@ -48,3 +48,22 @@ func TestNodeCarriesAttributes(test *testing.T) {
 		test.Fatalf("node attribute not stored: got %v, %v", value, ok)
 	}
 }
+
+func TestAttributeBagCloneAttributes(test *testing.T) {
+	var bag AttributeBag
+	bag.SetAttribute("type", "User")
+
+	clone := bag.CloneAttributes()
+	clone.SetAttribute("type", "Admin")
+	if value, _ := bag.GetAttribute("type"); value != "User" {
+		test.Fatalf("setting the clone changed the original: got %v", value)
+	}
+	if value, _ := clone.GetAttribute("type"); value != "Admin" {
+		test.Fatalf("got %v; want Admin", value)
+	}
+
+	var empty AttributeBag
+	if clone := empty.CloneAttributes(); !clone.Equal(empty) {
+		test.Fatal("the clone of an empty bag should equal it")
+	}
+}

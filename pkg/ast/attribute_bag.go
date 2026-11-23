@@ -1,6 +1,9 @@
 package ast
 
-import "reflect"
+import (
+	"maps"
+	"reflect"
+)
 
 // AttributeBag is embedded in every AST node to carry metadata assigned after
 // parsing, such as a resolved type. Attributes are keyed by string and allocated
@@ -27,4 +30,11 @@ func (bag *AttributeBag) SetAttribute(key string, value any) {
 func (bag *AttributeBag) GetAttribute(key string) (any, bool) {
 	value, ok := bag.attributes[key]
 	return value, ok
+}
+
+// CloneAttributes returns a bag with its own attribute map, for a copied
+// node whose attributes must not change the original's. The copy is shallow:
+// attribute values themselves (pointers, slices, maps) are shared.
+func (bag AttributeBag) CloneAttributes() AttributeBag {
+	return AttributeBag{attributes: maps.Clone(bag.attributes)}
 }
