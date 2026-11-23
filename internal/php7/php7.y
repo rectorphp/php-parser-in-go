@@ -4,8 +4,8 @@ package php7
 import (
     "strconv"
 
-    "github.com/TomasVotruba/reco/pkg/ast"
-    "github.com/TomasVotruba/reco/pkg/token"
+    "github.com/rectorphp/php-parser-in-go/pkg/ast"
+    "github.com/rectorphp/php-parser-in-go/pkg/token"
 )
 
 %}
@@ -1900,6 +1900,14 @@ argument:
                     Position: yylex.(*Parser).builder.NewTokenNodePosition($1, $2),
                     VariadicTkn: $1,
                     Expr:        $2,
+                }
+            }
+    |   '&' variable
+            {
+                $$ = &ast.Argument{
+                    Position: yylex.(*Parser).builder.NewTokenNodePosition($1, $2),
+                    AmpersandTkn: $1,
+                    Expr:         $2,
                 }
             }
 ;
