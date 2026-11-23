@@ -1054,6 +1054,13 @@ func (traverser *Traverser) ExprBinaryCoalesce(node *ast.ExprBinaryCoalesce) {
 	traverser.Traverse(node.Right)
 }
 
+func (traverser *Traverser) ExprBinaryPipe(node *ast.ExprBinaryPipe) {
+	node.Accept(traverser.v)
+
+	traverser.Traverse(node.Left)
+	traverser.Traverse(node.Right)
+}
+
 func (traverser *Traverser) ExprBinaryConcat(node *ast.ExprBinaryConcat) {
 	node.Accept(traverser.v)
 
@@ -1238,6 +1245,12 @@ func (traverser *Traverser) ExprCastString(node *ast.ExprCastString) {
 }
 
 func (traverser *Traverser) ExprCastUnset(node *ast.ExprCastUnset) {
+	node.Accept(traverser.v)
+
+	traverser.Traverse(node.Expr)
+}
+
+func (traverser *Traverser) ExprCastVoid(node *ast.ExprCastVoid) {
 	node.Accept(traverser.v)
 
 	traverser.Traverse(node.Expr)

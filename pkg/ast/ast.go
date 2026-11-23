@@ -142,6 +142,7 @@ type Visitor interface {
 	ExprBinaryBooleanAnd(node *ExprBinaryBooleanAnd)
 	ExprBinaryBooleanOr(node *ExprBinaryBooleanOr)
 	ExprBinaryCoalesce(node *ExprBinaryCoalesce)
+	ExprBinaryPipe(node *ExprBinaryPipe)
 	ExprBinaryConcat(node *ExprBinaryConcat)
 	ExprBinaryDiv(node *ExprBinaryDiv)
 	ExprBinaryEqual(node *ExprBinaryEqual)
@@ -171,6 +172,7 @@ type Visitor interface {
 	ExprCastObject(node *ExprCastObject)
 	ExprCastString(node *ExprCastString)
 	ExprCastUnset(node *ExprCastUnset)
+	ExprCastVoid(node *ExprCastVoid)
 
 	ScalarDnumber(node *ScalarDnumber)
 	ScalarEncapsed(node *ScalarEncapsed)

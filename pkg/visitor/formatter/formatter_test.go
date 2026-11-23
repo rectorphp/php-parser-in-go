@@ -3647,6 +3647,36 @@ func TestFormatter_ExprClassConstFetch(test *testing.T) {
 	}
 }
 
+func TestFormatter_ExprBinaryPipe(test *testing.T) {
+	buffer := bytes.NewBufferString("")
+
+	node := &ast.ExprBinaryPipe{
+		Left: &ast.ExprVariable{
+			Name: &ast.Identifier{
+				Value: []byte("$value"),
+			},
+		},
+		Right: &ast.ExprVariable{
+			Name: &ast.Identifier{
+				Value: []byte("$callable"),
+			},
+		},
+	}
+
+	formatterValue := formatter.NewFormatter().WithState(formatter.FormatterStatePHP).WithIndent(1)
+	node.Accept(formatterValue)
+
+	printerValue := printer.NewPrinter(buffer).WithState(printer.PrinterStatePHP)
+	node.Accept(printerValue)
+
+	expected := `$value |> $callable`
+	actual := buffer.String()
+
+	if expected != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
+
 func TestFormatter_ExprClassConstFetchComputedName(test *testing.T) {
 	buffer := bytes.NewBufferString("")
 

@@ -156,6 +156,8 @@ const (
 	T_PUBLIC_SET
 	T_PROTECTED_SET
 	T_PRIVATE_SET
+	T_PIPE
+	T_VOID_CAST
 )
 
 type Token struct {

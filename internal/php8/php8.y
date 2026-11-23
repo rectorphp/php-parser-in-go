@@ -166,6 +166,8 @@ import (
 %token <token> T_PUBLIC_SET
 %token <token> T_PROTECTED_SET
 %token <token> T_PRIVATE_SET
+%token <token> T_PIPE
+%token <token> T_VOID_CAST
 
 %token <token> '"'
 %token <token> '`'
@@ -216,6 +218,7 @@ import (
 %left '&' T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG
 %nonassoc T_IS_EQUAL T_IS_NOT_EQUAL T_IS_IDENTICAL T_IS_NOT_IDENTICAL T_SPACESHIP
 %nonassoc '<' T_IS_SMALLER_OR_EQUAL '>' T_IS_GREATER_OR_EQUAL
+%left T_PIPE
 %left T_SL T_SR
 %left '+' '-' '.'
 %left '*' '/' '%'
@@ -1104,6 +1107,19 @@ statement:
                     Position: yylex.(*Parser).builder.NewNodeTokenPosition($1, $2),
                     Expr:         $1,
                     SemiColonTkn: $2,
+                }
+            }
+    // PHP 8.5 `(void) expr;` discards a result on purpose; it is a statement, not an expression.
+    |   T_VOID_CAST expr ';'
+            {
+                $$ = &ast.StmtExpression{
+                    Position: yylex.(*Parser).builder.NewTokensPosition($1, $3),
+                    Expr: &ast.ExprCastVoid{
+                        Position: yylex.(*Parser).builder.NewTokenNodePosition($1, $2),
+                        CastTkn: $1,
+                        Expr:    $2,
+                    },
+                    SemiColonTkn: $3,
                 }
             }
     |   T_UNSET '(' unset_variables possible_comma ')' ';'
@@ -3227,6 +3243,27 @@ non_empty_for_exprs:
 
                 $$ = $1
             }
+    |   non_empty_for_exprs ',' T_VOID_CAST expr
+            {
+                $1.(*ParserSeparatedList).SeparatorTkns = append($1.(*ParserSeparatedList).SeparatorTkns, $2)
+                $1.(*ParserSeparatedList).Items = append($1.(*ParserSeparatedList).Items, &ast.ExprCastVoid{
+                    Position: yylex.(*Parser).builder.NewTokenNodePosition($3, $4),
+                    CastTkn: $3,
+                    Expr:    $4,
+                })
+
+                $$ = $1
+            }
+    |   T_VOID_CAST expr
+            {
+                $$ = &ParserSeparatedList{
+                    Items: []ast.Vertex{&ast.ExprCastVoid{
+                        Position: yylex.(*Parser).builder.NewTokenNodePosition($1, $2),
+                        CastTkn: $1,
+                        Expr:    $2,
+                    }},
+                }
+            }
     |   expr
             {
                 $$ = &ParserSeparatedList{
@@ -3904,6 +3941,16 @@ expr_without_variable:
                     QuestionTkn: $2,
                     ColonTkn:    $3,
                     IfFalse:     $4,
+                }
+            }
+    // PHP 8.5 pipe: `$value |> trim(...)` passes the left side to the callable on the right.
+    |   expr T_PIPE expr
+            {
+                $$ = &ast.ExprBinaryPipe{
+                    Position: yylex.(*Parser).builder.NewNodesPosition($1, $3),
+                    Left:  $1,
+                    OpTkn: $2,
+                    Right: $3,
                 }
             }
     |   expr T_COALESCE expr

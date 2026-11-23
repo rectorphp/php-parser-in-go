@@ -1144,6 +1144,12 @@ func (printer *printer) ExprBinaryCoalesce(node *ast.ExprBinaryCoalesce) {
 	printer.printNode(node.Right)
 }
 
+func (printer *printer) ExprBinaryPipe(node *ast.ExprBinaryPipe) {
+	printer.printNode(node.Left)
+	printer.printToken(node.OpTkn, []byte("|>"))
+	printer.printNode(node.Right)
+}
+
 func (printer *printer) ExprBinaryConcat(node *ast.ExprBinaryConcat) {
 	printer.printNode(node.Left)
 	printer.printToken(node.OpTkn, []byte("."))
@@ -1302,6 +1308,11 @@ func (printer *printer) ExprCastString(node *ast.ExprCastString) {
 
 func (printer *printer) ExprCastUnset(node *ast.ExprCastUnset) {
 	printer.printToken(node.CastTkn, []byte("(unset)"))
+	printer.printNode(node.Expr)
+}
+
+func (printer *printer) ExprCastVoid(node *ast.ExprCastVoid) {
+	printer.printToken(node.CastTkn, []byte("(void)"))
 	printer.printNode(node.Expr)
 }
 
