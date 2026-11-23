@@ -1428,6 +1428,14 @@ func (formatter *formatter) ExprBrackets(node *ast.ExprBrackets) {
 func (formatter *formatter) ExprClassConstFetch(node *ast.ExprClassConstFetch) {
 	node.Class.Accept(formatter)
 	node.DoubleColonTkn = formatter.newToken(token.T_PAAMAYIM_NEKUDOTAYIM, []byte("::"))
+
+	node.OpenCurlyBracketTkn = nil
+	node.CloseCurlyBracketTkn = nil
+	if _, ok := node.Const.(*ast.Identifier); !ok {
+		node.OpenCurlyBracketTkn = formatter.newToken('{', []byte("{"))
+		node.CloseCurlyBracketTkn = formatter.newToken('}', []byte("}"))
+	}
+
 	node.Const.Accept(formatter)
 }
 

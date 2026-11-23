@@ -1800,6 +1800,30 @@ func TestPrinterPrintExprClassConstFetch(test *testing.T) {
 	}
 }
 
+func TestPrinterPrintExprClassConstFetchComputedName(test *testing.T) {
+	buffer := bytes.NewBufferString("")
+
+	printerValue := printer.NewPrinter(buffer).WithState(printer.PrinterStatePHP)
+	node := &ast.ExprClassConstFetch{
+		Class: &ast.ExprVariable{
+			Name: &ast.Identifier{Value: []byte("$var")},
+		},
+		OpenCurlyBracketTkn: &token.Token{Value: []byte("{")},
+		Const: &ast.ExprVariable{
+			Name: &ast.Identifier{Value: []byte("$name")},
+		},
+		CloseCurlyBracketTkn: &token.Token{Value: []byte("}")},
+	}
+	node.Accept(printerValue)
+
+	expected := `$var::{$name}`
+	actual := buffer.String()
+
+	if expected != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
+
 func TestPrinterPrintExprClone(test *testing.T) {
 	buffer := bytes.NewBufferString("")
 

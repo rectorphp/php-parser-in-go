@@ -1215,7 +1215,9 @@ func (dumper *Dumper) ExprClassConstFetch(node *ast.ExprClassConstFetch) {
 	dumper.dumpPosition(node.Position)
 	dumper.dumpVertex("Class", node.Class)
 	dumper.dumpToken("DoubleColonTkn", node.DoubleColonTkn)
+	dumper.dumpToken("OpenCurlyBracketTkn", node.OpenCurlyBracketTkn)
 	dumper.dumpVertex("Const", node.Const)
+	dumper.dumpToken("CloseCurlyBracketTkn", node.CloseCurlyBracketTkn)
 
 	dumper.indent--
 	dumper.print(dumper.indent, "},\n")
