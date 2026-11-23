@@ -2339,6 +2339,14 @@ argument:
                     Expr:        $2,
                 }
             }
+    |   '&' variable
+            {
+                $$ = &ast.Argument{
+                    Position: yylex.(*Parser).builder.NewTokenNodePosition($1, $2),
+                    AmpersandTkn: $1,
+                    Expr:         $2,
+                }
+            }
 ;
 
 match_arm_list:
