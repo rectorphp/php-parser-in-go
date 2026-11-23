@@ -523,6 +523,10 @@ func (visitor *Null) ExprBinaryCoalesce(_ *ast.ExprBinaryCoalesce) {
 	// do nothing
 }
 
+func (visitor *Null) ExprBinaryPipe(_ *ast.ExprBinaryPipe) {
+	// do nothing
+}
+
 func (visitor *Null) ExprBinaryConcat(_ *ast.ExprBinaryConcat) {
 	// do nothing
 }
@@ -632,6 +636,10 @@ func (visitor *Null) ExprCastString(_ *ast.ExprCastString) {
 }
 
 func (visitor *Null) ExprCastUnset(_ *ast.ExprCastUnset) {
+	// do nothing
+}
+
+func (visitor *Null) ExprCastVoid(_ *ast.ExprCastVoid) {
 	// do nothing
 }
 

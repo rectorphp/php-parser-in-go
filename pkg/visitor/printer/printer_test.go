@@ -1800,6 +1800,47 @@ func TestPrinterPrintExprClassConstFetch(test *testing.T) {
 	}
 }
 
+func TestPrinterPrintExprBinaryPipe(test *testing.T) {
+	buffer := bytes.NewBufferString("")
+
+	printerValue := printer.NewPrinter(buffer).WithState(printer.PrinterStatePHP)
+	node := &ast.ExprBinaryPipe{
+		Left: &ast.ExprVariable{
+			Name: &ast.Identifier{Value: []byte("$a")},
+		},
+		Right: &ast.ExprVariable{
+			Name: &ast.Identifier{Value: []byte("$b")},
+		},
+	}
+	node.Accept(printerValue)
+
+	expected := `$a|>$b`
+	actual := buffer.String()
+
+	if expected != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
+
+func TestPrinterPrintExprCastVoid(test *testing.T) {
+	buffer := bytes.NewBufferString("")
+
+	printerValue := printer.NewPrinter(buffer).WithState(printer.PrinterStatePHP)
+	node := &ast.ExprCastVoid{
+		Expr: &ast.ExprVariable{
+			Name: &ast.Identifier{Value: []byte("$var")},
+		},
+	}
+	node.Accept(printerValue)
+
+	expected := `(void)$var`
+	actual := buffer.String()
+
+	if expected != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
+
 func TestPrinterPrintExprClassConstFetchComputedName(test *testing.T) {
 	buffer := bytes.NewBufferString("")
 

@@ -2300,6 +2300,23 @@ func (node *ExprCastUnset) GetPosition() *position.Position {
 	return node.Position
 }
 
+// ExprCastVoid node, the PHP 8.5 `(void)` cast; it only appears as a statement
+// or a for expression.
+type ExprCastVoid struct {
+	AttributeBag
+	Position *position.Position
+	CastTkn  *token.Token
+	Expr     Vertex
+}
+
+func (node *ExprCastVoid) Accept(visitor Visitor) {
+	visitor.ExprCastVoid(node)
+}
+
+func (node *ExprCastVoid) GetPosition() *position.Position {
+	return node.Position
+}
+
 // ExprAssign node
 type ExprAssign struct {
 	AttributeBag
@@ -2638,6 +2655,23 @@ func (node *ExprBinaryBooleanOr) Accept(visitor Visitor) {
 }
 
 func (node *ExprBinaryBooleanOr) GetPosition() *position.Position {
+	return node.Position
+}
+
+// ExprBinaryPipe node, the PHP 8.5 pipe operator `$value |> callable`
+type ExprBinaryPipe struct {
+	AttributeBag
+	Position *position.Position
+	Left     Vertex
+	OpTkn    *token.Token
+	Right    Vertex
+}
+
+func (node *ExprBinaryPipe) Accept(visitor Visitor) {
+	visitor.ExprBinaryPipe(node)
+}
+
+func (node *ExprBinaryPipe) GetPosition() *position.Position {
 	return node.Position
 }
 

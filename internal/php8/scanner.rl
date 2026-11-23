@@ -349,6 +349,7 @@ func (lex *Lexer) Lex() *token.Token {
             '>>'                              => {lex.setTokenPosition(tkn); tok = token.T_SR; fbreak;};
             '??'                              => {lex.setTokenPosition(tkn); tok = token.T_COALESCE; fbreak;};
             '??='                             => {lex.setTokenPosition(tkn); tok = token.T_COALESCE_EQUAL; fbreak;};
+            '|>'                              => {lex.setTokenPosition(tkn); tok = token.T_PIPE; fbreak;};
 
             '(' whitespace* 'array'i whitespace* ')'              => {lex.setTokenPosition(tkn); tok = token.T_ARRAY_CAST; fbreak;};
             '(' whitespace* ('bool'i|'boolean'i) whitespace* ')'  => {lex.setTokenPosition(tkn); tok = token.T_BOOL_CAST; fbreak;};
@@ -357,6 +358,7 @@ func (lex *Lexer) Lex() *token.Token {
             '(' whitespace* 'object'i whitespace* ')'             => {lex.setTokenPosition(tkn); tok = token.T_OBJECT_CAST; fbreak;};
             '(' whitespace* ('string'i|'binary'i) whitespace* ')' => {lex.setTokenPosition(tkn); tok = token.T_STRING_CAST; fbreak;};
             '(' whitespace* 'unset'i whitespace* ')'              => {lex.setTokenPosition(tkn); tok = token.T_UNSET_CAST; fbreak;};
+            '(' whitespace* 'void'i whitespace* ')'               => {lex.setTokenPosition(tkn); tok = token.T_VOID_CAST; fbreak;};
 
             line_comment => add_line_comment;
             '#' => {

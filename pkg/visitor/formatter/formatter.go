@@ -2074,6 +2074,16 @@ func (formatter *formatter) ExprBinaryCoalesce(node *ast.ExprBinaryCoalesce) {
 	node.Right.Accept(formatter)
 }
 
+func (formatter *formatter) ExprBinaryPipe(node *ast.ExprBinaryPipe) {
+	node.Left.Accept(formatter)
+
+	formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
+	node.OpTkn = formatter.newToken(token.T_PIPE, []byte("|>"))
+	formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
+
+	node.Right.Accept(formatter)
+}
+
 func (formatter *formatter) ExprBinaryConcat(node *ast.ExprBinaryConcat) {
 	node.Left.Accept(formatter)
 
@@ -2316,6 +2326,11 @@ func (formatter *formatter) ExprCastString(node *ast.ExprCastString) {
 
 func (formatter *formatter) ExprCastUnset(node *ast.ExprCastUnset) {
 	node.CastTkn = formatter.newToken(token.T_UNSET_CAST, []byte("(unset)"))
+	node.Expr.Accept(formatter)
+}
+
+func (formatter *formatter) ExprCastVoid(node *ast.ExprCastVoid) {
+	node.CastTkn = formatter.newToken(token.T_VOID_CAST, []byte("(void)"))
 	node.Expr.Accept(formatter)
 }
 

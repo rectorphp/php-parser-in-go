@@ -2033,6 +2033,19 @@ func (dumper *Dumper) ExprBinaryCoalesce(node *ast.ExprBinaryCoalesce) {
 	dumper.print(dumper.indent, "},\n")
 }
 
+func (dumper *Dumper) ExprBinaryPipe(node *ast.ExprBinaryPipe) {
+	dumper.print(0, "&ast.ExprBinaryPipe{\n")
+	dumper.indent++
+
+	dumper.dumpPosition(node.Position)
+	dumper.dumpVertex("Left", node.Left)
+	dumper.dumpToken("OpTkn", node.OpTkn)
+	dumper.dumpVertex("Right", node.Right)
+
+	dumper.indent--
+	dumper.print(dumper.indent, "},\n")
+}
+
 func (dumper *Dumper) ExprBinaryConcat(node *ast.ExprBinaryConcat) {
 	dumper.print(0, "&ast.ExprBinaryConcat{\n")
 	dumper.indent++
@@ -2380,6 +2393,18 @@ func (dumper *Dumper) ExprCastString(node *ast.ExprCastString) {
 
 func (dumper *Dumper) ExprCastUnset(node *ast.ExprCastUnset) {
 	dumper.print(0, "&ast.ExprCastUnset{\n")
+	dumper.indent++
+
+	dumper.dumpPosition(node.Position)
+	dumper.dumpToken("CastTkn", node.CastTkn)
+	dumper.dumpVertex("Expr", node.Expr)
+
+	dumper.indent--
+	dumper.print(dumper.indent, "},\n")
+}
+
+func (dumper *Dumper) ExprCastVoid(node *ast.ExprCastVoid) {
+	dumper.print(0, "&ast.ExprCastVoid{\n")
 	dumper.indent++
 
 	dumper.dumpPosition(node.Position)
