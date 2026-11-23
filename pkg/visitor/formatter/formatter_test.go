@@ -2092,6 +2092,81 @@ func TestFormatter_StmtPropertyList(test *testing.T) {
 	}
 }
 
+func TestFormatter_StmtPropertyList_Hooks(test *testing.T) {
+	buffer := bytes.NewBufferString("")
+
+	node := &ast.StmtPropertyList{
+		Modifiers: []ast.Vertex{
+			&ast.Identifier{
+				Value: []byte("public"),
+			},
+		},
+		Props: []ast.Vertex{
+			&ast.StmtProperty{
+				Var: &ast.Identifier{
+					Value: []byte("$foo"),
+				},
+			},
+		},
+		Hooks: []ast.Vertex{
+			&ast.PropertyHook{
+				Name: &ast.Identifier{
+					Value: []byte("get"),
+				},
+				Expr: &ast.Identifier{
+					Value: []byte("$bar"),
+				},
+			},
+			&ast.PropertyHook{
+				Name: &ast.Identifier{
+					Value: []byte("set"),
+				},
+				Params: []ast.Vertex{
+					&ast.Parameter{
+						Var: &ast.Identifier{
+							Value: []byte("$value"),
+						},
+					},
+				},
+				Stmt: &ast.StmtStmtList{
+					Stmts: []ast.Vertex{
+						&ast.StmtNop{},
+					},
+				},
+			},
+			&ast.PropertyHook{
+				Modifiers: []ast.Vertex{
+					&ast.Identifier{
+						Value: []byte("final"),
+					},
+				},
+				Name: &ast.Identifier{
+					Value: []byte("get"),
+				},
+			},
+		},
+	}
+
+	formatterValue := formatter.NewFormatter().WithState(formatter.FormatterStatePHP).WithIndent(1)
+	node.Accept(formatterValue)
+
+	printerValue := printer.NewPrinter(buffer).WithState(printer.PrinterStatePHP)
+	node.Accept(printerValue)
+
+	expected := `public $foo {
+        get => $bar;
+        set($value) {
+            ;
+        }
+        final get;
+    }`
+	actual := buffer.String()
+
+	if expected != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
+
 func TestFormatter_StmtPropertyList_Modifiers(test *testing.T) {
 	buffer := bytes.NewBufferString("")
 

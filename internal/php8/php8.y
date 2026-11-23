@@ -163,6 +163,9 @@ import (
 %token <token> T_READONLY
 %token <token> T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG
 %token <token> T_ENUM
+%token <token> T_PUBLIC_SET
+%token <token> T_PROTECTED_SET
+%token <token> T_PRIVATE_SET
 
 %token <token> '"'
 %token <token> '`'
@@ -265,6 +268,7 @@ import (
 %type <node> dnf_parenthesized_intersection
 %type <node> class_modifier
 %type <node> argument_list ctor_arguments
+%type <node> property_hook property_hook_body optional_property_hook_list
 %type <node> trait_adaptations
 %type <node> switch_case_list
 %type <node> method_body
@@ -289,6 +293,7 @@ import (
 %type <list> method_modifiers variable_modifiers
 %type <list> non_empty_member_modifiers class_modifiers
 %type <list> attributes
+%type <list> property_hook_list property_hook_modifiers
 
 %%
 
@@ -2059,9 +2064,9 @@ parameter:
                     DefaultValue: $6,
                 }
             }
-    |   non_empty_member_modifiers optional_type is_reference is_variadic T_VARIABLE
+    |   non_empty_member_modifiers optional_type is_reference is_variadic T_VARIABLE optional_property_hook_list
             {
-                $$ = &ast.Parameter{
+                parameter := &ast.Parameter{
                     Position: yylex.(*Parser).builder.NewNodeListTokenPosition($1, $5),
                     Modifiers:    $1,
                     Type:         $2,
@@ -2076,10 +2081,19 @@ parameter:
                         },
                     },
                 }
+
+                if hookList, ok := $6.(*PropertyHookList); ok {
+                    parameter.Position = yylex.(*Parser).builder.NewNodeListTokenPosition($1, hookList.CloseCurlyBracketTkn)
+                    parameter.OpenCurlyBracketTkn = hookList.OpenCurlyBracketTkn
+                    parameter.Hooks = hookList.Hooks
+                    parameter.CloseCurlyBracketTkn = hookList.CloseCurlyBracketTkn
+                }
+
+                $$ = parameter
             }
-    |   non_empty_member_modifiers optional_type is_reference is_variadic T_VARIABLE '=' expr
+    |   non_empty_member_modifiers optional_type is_reference is_variadic T_VARIABLE '=' expr optional_property_hook_list
             {
-                $$ = &ast.Parameter{
+                parameter := &ast.Parameter{
                     Position: yylex.(*Parser).builder.NewNodeListNodePosition($1, $7),
                     Modifiers:    $1,
                     Type:         $2,
@@ -2096,6 +2110,15 @@ parameter:
                     EqualTkn:     $6,
                     DefaultValue: $7,
                 }
+
+                if hookList, ok := $8.(*PropertyHookList); ok {
+                    parameter.Position = yylex.(*Parser).builder.NewNodeListTokenPosition($1, hookList.CloseCurlyBracketTkn)
+                    parameter.OpenCurlyBracketTkn = hookList.OpenCurlyBracketTkn
+                    parameter.Hooks = hookList.Hooks
+                    parameter.CloseCurlyBracketTkn = hookList.CloseCurlyBracketTkn
+                }
+
+                $$ = parameter
             }
 ;
 
@@ -2538,6 +2561,18 @@ attributed_class_statement:
                     SemiColonTkn:  $4,
                 }
             }
+    |   variable_modifiers optional_type property '{' property_hook_list '}'
+            {
+                $$ = &ast.StmtPropertyList{
+                    Position: yylex.(*Parser).builder.NewNodeListTokenPosition($1, $6),
+                    Modifiers:            $1,
+                    Type:                 $2,
+                    Props:                []ast.Vertex{$3},
+                    OpenCurlyBracketTkn:  $4,
+                    Hooks:                $5,
+                    CloseCurlyBracketTkn: $6,
+                }
+            }
     |   method_modifiers T_CONST class_const_list ';'
             {
                 $$ = &ast.StmtClassConstList{
@@ -2902,6 +2937,30 @@ member_modifier:
                     Value:         $1.Value,
                 }
             }
+    |   T_PUBLIC_SET
+            {
+                $$ = &ast.Identifier{
+                    Position: yylex.(*Parser).builder.NewTokenPosition($1),
+                    IdentifierTkn: $1,
+                    Value:         $1.Value,
+                }
+            }
+    |   T_PROTECTED_SET
+            {
+                $$ = &ast.Identifier{
+                    Position: yylex.(*Parser).builder.NewTokenPosition($1),
+                    IdentifierTkn: $1,
+                    Value:         $1.Value,
+                }
+            }
+    |   T_PRIVATE_SET
+            {
+                $$ = &ast.Identifier{
+                    Position: yylex.(*Parser).builder.NewTokenPosition($1),
+                    IdentifierTkn: $1,
+                    Value:         $1.Value,
+                }
+            }
 ;
 
 property_list:
@@ -2950,6 +3009,130 @@ property:
                     },
                     EqualTkn: $2,
                     Expr:     $3,
+                }
+            }
+;
+
+optional_property_hook_list:
+        /* empty */
+            {
+                $$ = nil
+            }
+    |   '{' property_hook_list '}'
+            {
+                $$ = &PropertyHookList{
+                    Position: yylex.(*Parser).builder.NewTokensPosition($1, $3),
+                    OpenCurlyBracketTkn:  $1,
+                    Hooks:                $2,
+                    CloseCurlyBracketTkn: $3,
+                }
+            }
+;
+
+property_hook_list:
+        /* empty */
+            {
+                $$ = []ast.Vertex{}
+            }
+    |   property_hook_list property_hook
+            {
+                $$ = append($1, $2)
+            }
+    |   property_hook_list attributes property_hook
+            {
+                $3.(*ast.PropertyHook).AttrGroups = $2
+
+                $$ = append($1, $3)
+            }
+;
+
+property_hook_modifiers:
+        /* empty */
+            {
+                $$ = nil
+            }
+    |   non_empty_member_modifiers
+            {
+                $$ = $1
+            }
+;
+
+property_hook:
+        property_hook_modifiers returns_ref T_STRING backup_doc_comment property_hook_body
+            {
+                hook := $5.(*ast.PropertyHook)
+                hook.Modifiers = $1
+                hook.AmpersandTkn = $2
+                hook.Name = &ast.Identifier{
+                    Position: yylex.(*Parser).builder.NewTokenPosition($3),
+                    IdentifierTkn: $3,
+                    Value:         $3.Value,
+                }
+
+                if $1 != nil {
+                    hook.Position = yylex.(*Parser).builder.NewNodeListNodePosition($1, hook)
+                } else if $2 != nil {
+                    hook.Position = yylex.(*Parser).builder.NewTokenNodePosition($2, hook)
+                } else {
+                    hook.Position = yylex.(*Parser).builder.NewTokenNodePosition($3, hook)
+                }
+
+                $$ = hook
+            }
+    |   property_hook_modifiers returns_ref T_STRING backup_doc_comment '(' parameter_list ')' property_hook_body
+            {
+                hook := $8.(*ast.PropertyHook)
+                hook.Modifiers = $1
+                hook.AmpersandTkn = $2
+                hook.Name = &ast.Identifier{
+                    Position: yylex.(*Parser).builder.NewTokenPosition($3),
+                    IdentifierTkn: $3,
+                    Value:         $3.Value,
+                }
+                hook.OpenParenthesisTkn = $5
+                hook.Params = $6.(*ParserSeparatedList).Items
+                hook.SeparatorTkns = $6.(*ParserSeparatedList).SeparatorTkns
+                hook.CloseParenthesisTkn = $7
+
+                if $1 != nil {
+                    hook.Position = yylex.(*Parser).builder.NewNodeListNodePosition($1, hook)
+                } else if $2 != nil {
+                    hook.Position = yylex.(*Parser).builder.NewTokenNodePosition($2, hook)
+                } else {
+                    hook.Position = yylex.(*Parser).builder.NewTokenNodePosition($3, hook)
+                }
+
+                $$ = hook
+            }
+;
+
+property_hook_body:
+        ';'
+            {
+                $$ = &ast.PropertyHook{
+                    Position: yylex.(*Parser).builder.NewTokenPosition($1),
+                    SemiColonTkn: $1,
+                }
+            }
+    |   '{' inner_statement_list '}'
+            {
+                $$ = &ast.PropertyHook{
+                    Position: yylex.(*Parser).builder.NewTokensPosition($1, $3),
+                    Stmt: &ast.StmtStmtList{
+                        Position: yylex.(*Parser).builder.NewTokensPosition($1, $3),
+                        OpenCurlyBracketTkn:  $1,
+                        Stmts:                $2,
+                        CloseCurlyBracketTkn: $3,
+                    },
+                }
+            }
+    |   T_DOUBLE_ARROW expr ';'
+            {
+                $$ = &ast.PropertyHook{
+                    Position: yylex.(*Parser).builder.NewTokensPosition($1, $3),
+                    DoubleArrowTkn: $1,
+                    Expr:           $2,
+                    SemiColonTkn:   $3,
                 }
             }
 ;
@@ -4480,16 +4663,6 @@ callable_variable:
                     CloseBracketTkn: $4,
                 }
             }
-    |   dereferencable '{' expr '}'
-            {
-                $$ = &ast.ExprArrayDimFetch{
-                    Position: yylex.(*Parser).builder.NewNodeTokenPosition($1, $4),
-                    Var:             $1,
-                    OpenBracketTkn:  $2,
-                    Dim:             $3,
-                    CloseBracketTkn: $4,
-                }
-            }
     |   dereferencable T_OBJECT_OPERATOR property_name argument_list
             {
                 methodCall := &ast.ExprMethodCall{
@@ -4642,16 +4815,6 @@ new_variable:
                 $$ = $1
             }
     |   new_variable '[' optional_expr ']'
-            {
-                $$ = &ast.ExprArrayDimFetch{
-                    Position: yylex.(*Parser).builder.NewNodeTokenPosition($1, $4),
-                    Var:             $1,
-                    OpenBracketTkn:  $2,
-                    Dim:             $3,
-                    CloseBracketTkn: $4,
-                }
-            }
-    |   new_variable '{' expr '}'
             {
                 $$ = &ast.ExprArrayDimFetch{
                     Position: yylex.(*Parser).builder.NewNodeTokenPosition($1, $4),

@@ -235,6 +235,70 @@ func (formatter *formatter) Parameter(node *ast.Parameter) {
 		formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
 		node.DefaultValue.Accept(formatter)
 	}
+
+	if node.Hooks != nil {
+		node.OpenCurlyBracketTkn, node.CloseCurlyBracketTkn = formatter.formatHooks(node.Hooks)
+	}
+}
+
+// formatHooks lays out a property hook list as a block, one hook per line.
+func (formatter *formatter) formatHooks(hooks []ast.Vertex) (*token.Token, *token.Token) {
+	formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
+	openCurlyBracketTkn := formatter.newToken('{', []byte("{"))
+
+	if len(hooks) > 0 {
+		formatter.indent++
+		for _, hook := range hooks {
+			formatter.addFreeFloating(token.T_WHITESPACE, []byte("\n"))
+			formatter.addIndent()
+			hook.Accept(formatter)
+		}
+		formatter.indent--
+
+		formatter.addFreeFloating(token.T_WHITESPACE, []byte("\n"))
+		formatter.addIndent()
+	}
+
+	return openCurlyBracketTkn, formatter.newToken('}', []byte("}"))
+}
+
+func (formatter *formatter) PropertyHook(node *ast.PropertyHook) {
+	for _, modifier := range node.Modifiers {
+		modifier.Accept(formatter)
+		formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
+	}
+
+	if node.AmpersandTkn != nil {
+		node.AmpersandTkn = formatter.newToken('&', []byte("&"))
+	}
+
+	node.Name.Accept(formatter)
+
+	if node.OpenParenthesisTkn != nil || len(node.Params) > 0 {
+		node.OpenParenthesisTkn = formatter.newToken('(', []byte("("))
+		node.SeparatorTkns = nil
+		if len(node.Params) > 0 {
+			node.SeparatorTkns = formatter.formatList(node.Params, ',')
+		}
+		node.CloseParenthesisTkn = formatter.newToken(')', []byte(")"))
+	}
+
+	node.DoubleArrowTkn = nil
+	node.SemiColonTkn = nil
+
+	switch {
+	case node.Expr != nil:
+		formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
+		node.DoubleArrowTkn = formatter.newToken(token.T_DOUBLE_ARROW, []byte("=>"))
+		formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
+		node.Expr.Accept(formatter)
+		node.SemiColonTkn = formatter.newSemicolonTkn()
+	case node.Stmt != nil:
+		formatter.addFreeFloating(token.T_WHITESPACE, []byte(" "))
+		node.Stmt.Accept(formatter)
+	default:
+		node.SemiColonTkn = formatter.newSemicolonTkn()
+	}
 }
 
 func (formatter *formatter) Identifier(node *ast.Identifier) {
@@ -952,6 +1016,13 @@ func (formatter *formatter) StmtPropertyList(node *ast.StmtPropertyList) {
 	}
 
 	node.SeparatorTkns = formatter.formatList(node.Props, ',')
+
+	if node.Hooks != nil {
+		node.OpenCurlyBracketTkn, node.CloseCurlyBracketTkn = formatter.formatHooks(node.Hooks)
+		node.SemiColonTkn = nil
+
+		return
+	}
 
 	node.SemiColonTkn = formatter.newSemicolonTkn()
 }

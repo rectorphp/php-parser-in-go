@@ -160,6 +160,12 @@ func (namespaceResolver *NamespaceResolver) StmtPropertyList(node *ast.StmtPrope
 	}
 }
 
+func (namespaceResolver *NamespaceResolver) PropertyHook(node *ast.PropertyHook) {
+	for _, parameter := range node.Params {
+		namespaceResolver.ResolveType(parameter.(*ast.Parameter).Type)
+	}
+}
+
 func (namespaceResolver *NamespaceResolver) StmtClassConstList(node *ast.StmtClassConstList) {
 	if node.Type != nil {
 		namespaceResolver.ResolveType(node.Type)

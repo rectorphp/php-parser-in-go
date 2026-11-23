@@ -17,6 +17,7 @@ type Visitor interface {
 	Union(node *Union)
 	Intersection(node *Intersection)
 	Parameter(node *Parameter)
+	PropertyHook(node *PropertyHook)
 	Identifier(node *Identifier)
 	Argument(node *Argument)
 	Attribute(node *Attribute)
