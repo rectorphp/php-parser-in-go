@@ -2398,7 +2398,7 @@ func freeLabel(label string, parts []ast.Vertex) string {
 // endsHeredoc reports whether a line of body would end a heredoc labelled
 // label: it starts, after indentation, with the label as a whole word.
 func endsHeredoc(body []byte, label string) bool {
-	for _, line := range bytes.Split(body, []byte("\n")) {
+	for line := range bytes.SplitSeq(body, []byte("\n")) {
 		line = bytes.TrimLeft(line, " \t")
 		rest, ok := bytes.CutPrefix(line, []byte(label))
 		if !ok {
@@ -2408,7 +2408,7 @@ func endsHeredoc(body []byte, label string) bool {
 			return true
 		}
 		c := rest[0]
-		if !(c == '_' || c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= 0x80) {
+		if c != '_' && (c < '0' || c > '9') && (c < 'a' || c > 'z') && (c < 'A' || c > 'Z') && c < 0x80 {
 			return true
 		}
 	}
