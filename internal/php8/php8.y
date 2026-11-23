@@ -219,8 +219,10 @@ import (
 %nonassoc T_IS_EQUAL T_IS_NOT_EQUAL T_IS_IDENTICAL T_IS_NOT_IDENTICAL T_SPACESHIP
 %nonassoc '<' T_IS_SMALLER_OR_EQUAL '>' T_IS_GREATER_OR_EQUAL
 %left T_PIPE
+// Since PHP 8.0 concatenation binds looser than shifts and +/-: "a" . 1 + 2 is "a" . (1 + 2).
+%left '.'
 %left T_SL T_SR
-%left '+' '-' '.'
+%left '+' '-'
 %left '*' '/' '%'
 %right '!'
 %nonassoc T_INSTANCEOF
