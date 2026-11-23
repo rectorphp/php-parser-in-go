@@ -1499,7 +1499,11 @@ type ExprClassConstFetch struct {
 	Position       *position.Position
 	Class          Vertex
 	DoubleColonTkn *token.Token
-	Const          Vertex
+	// OpenCurlyBracketTkn and CloseCurlyBracketTkn wrap a computed constant name,
+	// `Foo::{$name}` (PHP 8.3); both are nil when Const is a plain identifier.
+	OpenCurlyBracketTkn  *token.Token
+	Const                Vertex
+	CloseCurlyBracketTkn *token.Token
 }
 
 func (node *ExprClassConstFetch) Accept(visitor Visitor) {

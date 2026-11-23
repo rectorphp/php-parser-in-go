@@ -4332,6 +4332,16 @@ class_name_reference:
             {
                 $$ = $1
             }
+    // Since PHP 8.0 `new` takes any expression in parentheses: `new ($a . 'B')`.
+    |   '(' expr ')'
+            {
+                $$ = &ast.ExprBrackets{
+                    Position: yylex.(*Parser).builder.NewTokensPosition($1, $3),
+                    OpenParenthesisTkn:  $1,
+                    Expr:                $2,
+                    CloseParenthesisTkn: $3,
+                }
+            }
 ;
 
 exit_expr:
@@ -4585,6 +4595,29 @@ class_constant:
                         IdentifierTkn: $3,
                         Value:         $3.Value,
                     },
+                }
+            }
+    // Since PHP 8.3 the constant name can be computed: `Foo::{$name}`.
+    |   class_name T_PAAMAYIM_NEKUDOTAYIM '{' expr '}'
+            {
+                $$ = &ast.ExprClassConstFetch{
+                    Position: yylex.(*Parser).builder.NewNodeTokenPosition($1, $5),
+                    Class:                $1,
+                    DoubleColonTkn:       $2,
+                    OpenCurlyBracketTkn:  $3,
+                    Const:                $4,
+                    CloseCurlyBracketTkn: $5,
+                }
+            }
+    |   variable_class_name T_PAAMAYIM_NEKUDOTAYIM '{' expr '}'
+            {
+                $$ = &ast.ExprClassConstFetch{
+                    Position: yylex.(*Parser).builder.NewNodeTokenPosition($1, $5),
+                    Class:                $1,
+                    DoubleColonTkn:       $2,
+                    OpenCurlyBracketTkn:  $3,
+                    Const:                $4,
+                    CloseCurlyBracketTkn: $5,
                 }
             }
 ;

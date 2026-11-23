@@ -753,7 +753,9 @@ func (printer *printer) ExprBrackets(node *ast.ExprBrackets) {
 func (printer *printer) ExprClassConstFetch(node *ast.ExprClassConstFetch) {
 	printer.printNode(node.Class)
 	printer.printToken(node.DoubleColonTkn, []byte("::"))
+	printer.printToken(node.OpenCurlyBracketTkn, nil)
 	printer.printNode(node.Const)
+	printer.printToken(node.CloseCurlyBracketTkn, nil)
 }
 
 func (printer *printer) ExprClone(node *ast.ExprClone) {

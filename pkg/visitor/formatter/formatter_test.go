@@ -3647,6 +3647,34 @@ func TestFormatter_ExprClassConstFetch(test *testing.T) {
 	}
 }
 
+func TestFormatter_ExprClassConstFetchComputedName(test *testing.T) {
+	buffer := bytes.NewBufferString("")
+
+	node := &ast.ExprClassConstFetch{
+		Class: &ast.Name{
+			Parts: []ast.Vertex{&ast.NamePart{Value: []byte("Status")}},
+		},
+		Const: &ast.ExprVariable{
+			Name: &ast.Identifier{
+				Value: []byte("$name"),
+			},
+		},
+	}
+
+	formatterValue := formatter.NewFormatter().WithState(formatter.FormatterStatePHP).WithIndent(1)
+	node.Accept(formatterValue)
+
+	printerValue := printer.NewPrinter(buffer).WithState(printer.PrinterStatePHP)
+	node.Accept(printerValue)
+
+	expected := `Status::{$name}`
+	actual := buffer.String()
+
+	if expected != actual {
+		test.Errorf("\nexpected: %s\ngot: %s\n", expected, actual)
+	}
+}
+
 func TestFormatter_ExprClone(test *testing.T) {
 	buffer := bytes.NewBufferString("")
 
