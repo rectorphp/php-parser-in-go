@@ -1,8 +1,10 @@
 package scanner
 
 import (
-	"gotest.tools/assert"
+	"strings"
 	"testing"
+
+	"gotest.tools/assert"
 
 	"github.com/rectorphp/php-parser-in-go/pkg/conf"
 	"github.com/rectorphp/php-parser-in-go/pkg/errors"
@@ -2014,4 +2016,51 @@ func TestStringVarPropertyEndsTheVariable(test *testing.T) {
 
 	assert.DeepEqual(test, expected, actual)
 	assert.DeepEqual(test, expectedTokens, actualTokens)
+}
+
+func TestLoneCarriageReturn(test *testing.T) {
+	src := "<?php\r$a\r= 1;\r"
+
+	type lexed struct {
+		ID           token.ID
+		Value        string
+		StartLine    int
+		FreeFloating string
+	}
+	expected := []lexed{
+		{ID: token.T_VARIABLE, Value: "$a", StartLine: 2, FreeFloating: "<?php\r"},
+		{ID: token.ID('='), Value: "=", StartLine: 3, FreeFloating: "\r"},
+		{ID: token.T_LNUMBER, Value: "1", StartLine: 3, FreeFloating: " "},
+		{ID: token.ID(';'), Value: ";", StartLine: 3},
+		{FreeFloating: "\r"},
+	}
+
+	var errs []*errors.Error
+	config := conf.Config{
+		Version: &version.Version{
+			Major: 7,
+			Minor: 4,
+		},
+		ErrorHandlerFunc: func(e *errors.Error) {
+			errs = append(errs, e)
+		},
+	}
+	lexer := NewLexer([]byte(src), config)
+
+	var actual []lexed
+	for {
+		tkn := lexer.Lex()
+		var freeFloating strings.Builder
+		for _, freeFloatingToken := range tkn.FreeFloating {
+			freeFloating.WriteString(string(freeFloatingToken.Value))
+		}
+		if tkn.ID == 0 {
+			actual = append(actual, lexed{FreeFloating: freeFloating.String()})
+			break
+		}
+		actual = append(actual, lexed{ID: tkn.ID, Value: string(tkn.Value), StartLine: tkn.Position.StartLine, FreeFloating: freeFloating.String()})
+	}
+
+	assert.DeepEqual(test, expected, actual)
+	assert.Equal(test, len(errs), 0)
 }
