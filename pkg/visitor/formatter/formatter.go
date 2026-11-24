@@ -331,6 +331,10 @@ func (formatter *formatter) Argument(node *ast.Argument) {
 		node.VariadicTkn = formatter.newToken(token.T_ELLIPSIS, []byte("..."))
 	}
 
+	if node.PlaceholderTkn != nil {
+		node.PlaceholderTkn = formatter.newToken('?', []byte("?"))
+	}
+
 	if node.AmpersandTkn != nil {
 		node.AmpersandTkn = formatter.newToken('&', []byte("&"))
 	}

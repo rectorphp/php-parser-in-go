@@ -2307,20 +2307,6 @@ argument_list:
                     CloseParenthesisTkn: $2,
                 }
             }
-    |   '(' T_ELLIPSIS ')'
-            {
-                $$ = &ArgumentList{
-                    Position: yylex.(*Parser).builder.NewTokensPosition($1, $3),
-                    OpenParenthesisTkn: $1,
-                    Arguments: []ast.Vertex{
-                        &ast.Argument{
-                            Position: yylex.(*Parser).builder.NewTokenPosition($2),
-                            VariadicTkn: $2,
-                        },
-                    },
-                    CloseParenthesisTkn: $3,
-                }
-            }
     |   '(' non_empty_argument_list possible_comma ')'
             {
                 argumentList := $2.(*ArgumentList)
@@ -2378,6 +2364,33 @@ argument:
                     Position: yylex.(*Parser).builder.NewTokenNodePosition($1, $2),
                     VariadicTkn: $1,
                     Expr:        $2,
+                }
+            }
+    |   T_ELLIPSIS
+            {
+                $$ = &ast.Argument{
+                    Position: yylex.(*Parser).builder.NewTokenPosition($1),
+                    VariadicTkn: $1,
+                }
+            }
+    |   '?'
+            {
+                $$ = &ast.Argument{
+                    Position: yylex.(*Parser).builder.NewTokenPosition($1),
+                    PlaceholderTkn: $1,
+                }
+            }
+    |   identifier ':' '?'
+            {
+                $$ = &ast.Argument{
+                    Position: yylex.(*Parser).builder.NewTokensPosition($1, $3),
+                    Name: &ast.Identifier{
+                        Position: yylex.(*Parser).builder.NewTokenPosition($1),
+                        IdentifierTkn: $1,
+                        Value:         $1.Value,
+                    },
+                    ColonTkn:       $2,
+                    PlaceholderTkn: $3,
                 }
             }
     |   '&' variable
@@ -4730,6 +4743,10 @@ dereferencable:
 
 callable_expr:
         callable_variable
+            {
+                $$ = $1
+            }
+    |   new_dereferenceable
             {
                 $$ = $1
             }
