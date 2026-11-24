@@ -202,6 +202,7 @@ func (printer *printer) Argument(node *ast.Argument) {
 	printer.printNode(node.Name)
 	printer.printToken(node.ColonTkn, printer.ifNode(node.Name, []byte(":")))
 	printer.printToken(node.VariadicTkn, nil)
+	printer.printToken(node.PlaceholderTkn, nil)
 	printer.printToken(node.AmpersandTkn, nil)
 	printer.printNode(node.Expr)
 }

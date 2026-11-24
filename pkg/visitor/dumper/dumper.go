@@ -275,6 +275,7 @@ func (dumper *Dumper) Argument(node *ast.Argument) {
 	dumper.dumpToken("ColonTkn", node.ColonTkn)
 	dumper.dumpToken("AmpersandTkn", node.AmpersandTkn)
 	dumper.dumpToken("VariadicTkn", node.VariadicTkn)
+	dumper.dumpToken("PlaceholderTkn", node.PlaceholderTkn)
 	dumper.dumpVertex("Expr", node.Expr)
 
 	dumper.indent--

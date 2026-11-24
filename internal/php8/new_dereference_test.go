@@ -42,6 +42,22 @@ func TestNewPropertyFetchWithoutParentheses(test *testing.T) {
 	}
 }
 
+func TestNewInvokedWithoutParentheses(test *testing.T) {
+	root, parserErrors := parsePhp8(`<?php $result = new Invokable()();`)
+	if len(parserErrors) != 0 {
+		test.Fatalf("unexpected parser errors: %v", parserErrors)
+	}
+
+	assign := root.(*ast.Root).Stmts[0].(*ast.StmtExpression).Expr.(*ast.ExprAssign)
+	call, ok := assign.Expr.(*ast.ExprFunctionCall)
+	if !ok {
+		test.Fatalf("expected *ast.ExprFunctionCall, got %T", assign.Expr)
+	}
+	if _, ok := call.Function.(*ast.ExprNew); !ok {
+		test.Errorf("expected the called expression *ast.ExprNew, got %T", call.Function)
+	}
+}
+
 // The dereferenced `new` must print back byte-for-byte, and the plain forms that
 // were valid before 8.4 (`new Foo`, `new Foo()`, `(new Foo())->bar()`) must be
 // left exactly as written.
@@ -50,6 +66,10 @@ func TestNewDereferenceRoundTrips(test *testing.T) {
 		`<?php new Filesystem()->remove($paths);`,
 		`<?php new \DateTime()->setTime(0, 0)->modify('+1 day');`,
 		`<?php $mime = (string) new \finfo(FILEINFO_MIME_TYPE)->buffer($chunk);`,
+		`<?php $result = new Invokable()();`,
+		`<?php new Request()?->withMethod('GET');`,
+		`<?php $constant = new Request()::METHOD_GET;`,
+		`<?php $value = new \ArrayObject(['key' => 'value'])['key'];`,
 		`<?php new Foo();`,
 		`<?php new Foo;`,
 		`<?php (new Foo())->bar();`,

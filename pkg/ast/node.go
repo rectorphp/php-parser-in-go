@@ -146,14 +146,17 @@ func (node *Identifier) GetPosition() *position.Position {
 }
 
 // Argument node
+// Argument is one call argument. A placeholder of partial function application
+// (`?`, `name: ?`, or a bare `...`) has no Expr: PlaceholderTkn or VariadicTkn is set.
 type Argument struct {
 	AttributeBag
-	Position     *position.Position
-	Name         Vertex
-	ColonTkn     *token.Token
-	VariadicTkn  *token.Token
-	AmpersandTkn *token.Token
-	Expr         Vertex
+	Position       *position.Position
+	Name           Vertex
+	ColonTkn       *token.Token
+	VariadicTkn    *token.Token
+	PlaceholderTkn *token.Token
+	AmpersandTkn   *token.Token
+	Expr           Vertex
 }
 
 func (node *Argument) Accept(visitor Visitor) {
