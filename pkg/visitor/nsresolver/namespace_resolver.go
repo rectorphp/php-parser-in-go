@@ -325,12 +325,35 @@ func (namespaceResolver *NamespaceResolver) ResolveType(node ast.Vertex) {
 			namespaceResolver.ResolveType(memberType)
 		}
 	case *ast.Name:
+		if builtinType, ok := typeOnlyBuiltin(typeNode); ok {
+			namespaceResolver.ResolvedNames[node] = builtinType
+			return
+		}
 		namespaceResolver.ResolveName(node, "")
 	case *ast.NameRelative:
 		namespaceResolver.ResolveName(node, "")
 	case *ast.NameFullyQualified:
 		namespaceResolver.ResolveName(node, "")
 	}
+}
+
+// typeOnlyBuiltin returns the lowercase name of a built-in type that is only a
+// type in type position: as a class name (new, extends, instanceof) PHP 7 code
+// may still declare a class named Mixed or Never, so those resolve as classes.
+func typeOnlyBuiltin(name *ast.Name) (string, bool) {
+	if len(name.Parts) != 1 {
+		return "", false
+	}
+	part, ok := name.Parts[0].(*ast.NamePart)
+	if !ok {
+		return "", false
+	}
+	lowered := strings.ToLower(string(part.Value))
+	switch lowered {
+	case "null", "false", "true", "mixed", "never":
+		return lowered, true
+	}
+	return "", false
 }
 
 // Namespace context
@@ -387,7 +410,7 @@ func (namespace *Namespace) ResolveName(nameNode ast.Vertex, aliasType string) (
 			part := strings.ToLower(string(name.Parts[0].(*ast.NamePart).Value))
 
 			switch part {
-			case "self", "static", "parent", "int", "float", "bool", "string", "void", "iterable", "object", "null", "false", "true", "mixed", "never":
+			case "self", "static", "parent", "int", "float", "bool", "string", "void", "iterable", "object":
 				return part, nil
 			}
 		}
