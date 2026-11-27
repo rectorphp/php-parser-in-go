@@ -91,3 +91,31 @@ function run(Nullable $a, Mixedness $b): Never\Type {}
 
 	assert.DeepEqual(test, []string{"App\\Mixedness", "App\\Never\\Type", "App\\Nullable"}, resolvedNames)
 }
+
+func TestResolveMixedAndNeverAsClassOutsideTypePosition(test *testing.T) {
+	phpVersion, _ := version.New("7.4")
+	root, err := parser.Parse([]byte(`<?php
+namespace App;
+class Mixed {}
+class Never {}
+class Child extends Mixed {}
+function run($value) {
+    new Never();
+    return $value instanceof Mixed;
+}
+`), conf.Config{Version: phpVersion})
+	assert.NilError(test, err)
+
+	resolver := nsresolver.NewNamespaceResolver()
+	traverser.NewTraverser(resolver).Traverse(root)
+
+	var resolvedNames []string
+	for node, resolvedName := range resolver.ResolvedNames {
+		if _, isName := node.(*ast.Name); isName {
+			resolvedNames = append(resolvedNames, resolvedName)
+		}
+	}
+	slices.Sort(resolvedNames)
+
+	assert.DeepEqual(test, []string{"App\\Mixed", "App\\Mixed", "App\\Never"}, resolvedNames)
+}
