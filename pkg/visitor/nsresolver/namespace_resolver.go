@@ -387,25 +387,7 @@ func (namespace *Namespace) ResolveName(nameNode ast.Vertex, aliasType string) (
 			part := strings.ToLower(string(name.Parts[0].(*ast.NamePart).Value))
 
 			switch part {
-			case "self":
-				fallthrough
-			case "static":
-				fallthrough
-			case "parent":
-				fallthrough
-			case "int":
-				fallthrough
-			case "float":
-				fallthrough
-			case "bool":
-				fallthrough
-			case "string":
-				fallthrough
-			case "void":
-				fallthrough
-			case "iterable":
-				fallthrough
-			case "object":
+			case "self", "static", "parent", "int", "float", "bool", "string", "void", "iterable", "object", "null", "false", "true", "mixed", "never":
 				return part, nil
 			}
 		}
